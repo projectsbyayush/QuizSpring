@@ -43,13 +43,11 @@ export default function Navbar() {
     section?: string;
   }
   const authenticatedLinks: NavEntry[] = [
-    { label: 'Home', to: '/dashboard' },
     { label: 'Explore', to: '/quizzes' },
     { label: 'My quizzes', to: '/quizzes/mine' },
     { label: 'Create', to: '/quizzes/create' },
   ];
   const guestLinks: NavEntry[] = [
-    { label: 'Home', to: '/' },
     { label: 'Features', section: 'features' },
     { label: 'How it works', section: 'how-it-works' },
   ];
