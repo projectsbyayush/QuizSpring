@@ -17,6 +17,25 @@ export async function register(input: RegisterInput): Promise<AuthResponse> {
   return data;
 }
 
+function randomToken(length: number): string {
+  const alphabet = 'abcdefghijklmnopqrstuvwxyz0123456789';
+  let token = '';
+  const values = crypto.getRandomValues(new Uint32Array(length));
+  for (const value of values) {
+    token += alphabet[value % alphabet.length];
+  }
+  return token;
+}
+
+export function guestCredentials(): RegisterInput {
+  const suffix = randomToken(8);
+  return {
+    username: `guest_${suffix}`,
+    email: `guest_${suffix}@quizspring.demo`,
+    password: `Demo-${randomToken(12)}!`,
+  };
+}
+
 export async function login(input: LoginInput): Promise<AuthResponse> {
   const { data } = await apiClient.post<AuthResponse>('/auth/login', input);
   persistAuthResponse(data);

@@ -1,8 +1,12 @@
+import { useState } from 'react';
 import { Box, Button, Card, CardContent, Chip, Container, Divider, Stack, Typography } from '@mui/material';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined';
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
-import { Link as RouterLink } from 'react-router-dom';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
+import { guestCredentials } from '../api/auth';
+import { useToast } from '../context/ToastContext';
+import { useAuth } from '../contexts/AuthContext';
 import Footer from '../components/Footer';
 import Navbar from '../components/Navbar';
 
@@ -48,6 +52,22 @@ const steps = [
 const assurances = ['Timed attempts', 'Answer explanations', 'Progress tracking', 'Creator tools'];
 
 export default function LandingPage() {
+  const navigate = useNavigate();
+  const { signUp } = useAuth();
+  const { showToast } = useToast();
+  const [demoPending, setDemoPending] = useState(false);
+
+  const tryDemo = async (): Promise<void> => {
+    setDemoPending(true);
+    try {
+      const result = await signUp(guestCredentials());
+      if (result.error) showToast(result.error, 'error');
+      else navigate('/dashboard', { replace: true });
+    } finally {
+      setDemoPending(false);
+    }
+  };
+
   return (
     <Box sx={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
       <Navbar />
@@ -99,6 +119,15 @@ export default function LandingPage() {
                     Sign In
                   </Button>
                 </Stack>
+                <Button
+                  variant="text"
+                  size="large"
+                  disabled={demoPending}
+                  onClick={() => void tryDemo()}
+                  sx={{ mt: 1, ml: { xs: 0, sm: -1 } }}
+                >
+                  {demoPending ? 'Creating your demo…' : 'Just looking? Try a demo account →'}
+                </Button>
                 <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap sx={{ mt: 3 }}>
                   {assurances.map((assurance) => (
                     <Chip

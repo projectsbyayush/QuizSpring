@@ -28,20 +28,26 @@ export default function Navbar() {
   const [mobileAnchor, setMobileAnchor] = useState<HTMLElement | null>(null);
 
   const displayName = user?.username || user?.email.split('@')[0] || 'Account';
-  const authenticatedLinks = [
+  interface NavEntry {
+    label: string;
+    to?: string;
+    section?: string;
+  }
+  const authenticatedLinks: NavEntry[] = [
     { label: 'Home', to: '/dashboard' },
     { label: 'Explore', to: '/quizzes' },
     { label: 'My quizzes', to: '/quizzes/mine' },
     { label: 'Create', to: '/quizzes/create' },
   ];
-  const guestLinks = [
+  const guestLinks: NavEntry[] = [
     { label: 'Home', to: '/' },
-    { label: 'Features', to: '/#features' },
-    { label: 'How it works', to: '/#how-it-works' },
+    { label: 'Features', section: 'features' },
+    { label: 'How it works', section: 'how-it-works' },
   ];
 
-  const isActive = (to: string): boolean => {
-    if (to.startsWith('/#')) return location.hash === to.slice(1);
+  const isActive = (link: { to?: string; section?: string }): boolean => {
+    if (link.section) return location.pathname === '/' && location.hash === `#${link.section}`;
+    const to = link.to ?? '/';
     if (to === '/') return location.pathname === '/';
     if (to === '/quizzes') {
       if (location.pathname === '/quizzes') return true;
@@ -51,15 +57,15 @@ export default function Navbar() {
     return location.pathname === to || location.pathname.startsWith(`${to}/`);
   };
 
-  const linkStyle = (to: string) => ({
-    fontWeight: isActive(to) ? 800 : 650,
-    color: isActive(to) ? 'primary.main' : 'text.secondary',
+  const linkStyle = (active: boolean) => ({
+    fontWeight: active ? 800 : 650,
+    color: active ? 'primary.main' : 'text.secondary',
     borderRadius: 2,
     paddingLeft: 1.5,
     paddingRight: 1.5,
     position: 'relative',
     '&:hover': { color: 'text.primary', backgroundColor: 'transparent' },
-    '&::after': isActive(to)
+    '&::after': active
       ? {
           content: '""',
           position: 'absolute',
@@ -74,6 +80,20 @@ export default function Navbar() {
   });
 
   const closeMobileMenu = (): void => setMobileAnchor(null);
+
+  const scrollToSection = (section: string): void => {
+    closeMobileMenu();
+    const scroll = (): void => {
+      document.getElementById(section)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+    if (location.pathname !== '/') {
+      navigate(`/#${section}`);
+      window.setTimeout(scroll, 150);
+    } else {
+      window.history.replaceState(null, '', `#${section}`);
+      scroll();
+    }
+  };
 
   const handleSignOut = async (): Promise<void> => {
     setAccountAnchor(null);
@@ -120,13 +140,34 @@ export default function Navbar() {
           </Box>
 
           <Box sx={{ display: { xs: 'none', md: 'flex' }, alignItems: 'center', gap: 0.25 }}>
-            {(user ? authenticatedLinks : guestLinks).map((link) => (
-              <Button key={link.label} component={RouterLink} to={link.to} color="inherit" sx={linkStyle(link.to)}>
-                {link.label}
-              </Button>
-            ))}
+            {(user ? authenticatedLinks : guestLinks).map((link) => {
+              const active = isActive(link);
+              if (link.section) {
+                return (
+                  <Button
+                    key={link.label}
+                    color="inherit"
+                    onClick={() => scrollToSection(link.section as string)}
+                    sx={linkStyle(active)}
+                  >
+                    {link.label}
+                  </Button>
+                );
+              }
+              return (
+                <Button
+                  key={link.label}
+                  component={RouterLink}
+                  to={link.to as string}
+                  color="inherit"
+                  sx={linkStyle(active)}
+                >
+                  {link.label}
+                </Button>
+              );
+            })}
             {user && isAdmin && (
-              <Button component={RouterLink} to="/admin" color="inherit" sx={linkStyle('/admin')}>
+              <Button component={RouterLink} to="/admin" color="inherit" sx={linkStyle(isActive({ to: '/admin' }))}>
                 Admin
               </Button>
             )}
@@ -151,15 +192,20 @@ export default function Navbar() {
                   <MenuItem
                     key={link.label}
                     component={RouterLink}
-                    to={link.to}
-                    selected={isActive(link.to)}
+                    to={link.to as string}
+                    selected={isActive(link)}
                     onClick={closeMobileMenu}
                   >
                     {link.label}
                   </MenuItem>
                 ))}
                 {isAdmin && (
-                  <MenuItem component={RouterLink} to="/admin" selected={isActive('/admin')} onClick={closeMobileMenu}>
+                  <MenuItem
+                    component={RouterLink}
+                    to="/admin"
+                    selected={isActive({ to: '/admin' })}
+                    onClick={closeMobileMenu}
+                  >
                     Admin
                   </MenuItem>
                 )}
@@ -228,17 +274,30 @@ export default function Navbar() {
                 <MenuOutlinedIcon />
               </IconButton>
               <Menu anchorEl={mobileAnchor} open={Boolean(mobileAnchor)} onClose={closeMobileMenu}>
-                {guestLinks.map((link) => (
-                  <MenuItem
-                    key={link.label}
-                    component={RouterLink}
-                    to={link.to}
-                    selected={isActive(link.to)}
-                    onClick={closeMobileMenu}
-                  >
-                    {link.label}
-                  </MenuItem>
-                ))}
+                {guestLinks.map((link) => {
+                  if (link.section) {
+                    return (
+                      <MenuItem
+                        key={link.label}
+                        selected={isActive(link)}
+                        onClick={() => scrollToSection(link.section as string)}
+                      >
+                        {link.label}
+                      </MenuItem>
+                    );
+                  }
+                  return (
+                    <MenuItem
+                      key={link.label}
+                      component={RouterLink}
+                      to={link.to as string}
+                      selected={isActive(link)}
+                      onClick={closeMobileMenu}
+                    >
+                      {link.label}
+                    </MenuItem>
+                  );
+                })}
                 <MenuItem component={RouterLink} to="/login" onClick={closeMobileMenu}>
                   Sign in
                 </MenuItem>

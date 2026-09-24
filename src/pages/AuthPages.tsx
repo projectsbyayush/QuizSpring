@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Link as RouterLink, useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import { Alert, Box, Button, Card, CardContent, Link as MuiLink, Stack, TextField, Typography } from '@mui/material';
+import { guestCredentials } from '../api/auth';
 import { useAuth } from '../contexts/AuthContext';
 
 const emailSchema = z.string().trim().min(1, 'Email is required').email('Enter a valid email address');
@@ -63,10 +64,11 @@ function FormError({ message }: { message?: string }) {
 }
 
 export function LoginPage() {
-  const { signIn } = useAuth();
+  const { signIn, signUp } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
   const [error, setError] = useState<string | null>(null);
+  const [demoPending, setDemoPending] = useState(false);
   const { register, handleSubmit, formState } = useForm<LoginValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: '', password: '' },
@@ -79,6 +81,18 @@ export function LoginPage() {
     if (result.error) setError(result.error);
     else navigate(result.user?.role === 'admin' ? '/admin' : from, { replace: true });
   });
+
+  const tryDemo = async (): Promise<void> => {
+    setError(null);
+    setDemoPending(true);
+    try {
+      const result = await signUp(guestCredentials());
+      if (result.error) setError(result.error);
+      else navigate('/dashboard', { replace: true });
+    } finally {
+      setDemoPending(false);
+    }
+  };
 
   return (
     <AuthShell title="Welcome back" subtitle="Sign in to continue learning.">
@@ -107,6 +121,9 @@ export function LoginPage() {
           />
           <Button type="submit" variant="contained" size="large" disabled={formState.isSubmitting} fullWidth>
             {formState.isSubmitting ? 'Signing in…' : 'Sign in'}
+          </Button>
+          <Button variant="outlined" size="large" disabled={demoPending} onClick={() => void tryDemo()} fullWidth>
+            {demoPending ? 'Creating demo account…' : 'Try a demo account'}
           </Button>
           <Stack direction="row" justifyContent="space-between">
             <MuiLink component={RouterLink} to="/forgot-password" variant="body2">
