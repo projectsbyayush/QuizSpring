@@ -1,0 +1,16 @@
+export const routes = {
+  landing: '/',
+  login: '/login',
+  signup: '/signup',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
+  dashboard: '/dashboard',
+  quizzes: '/quizzes',
+  myQuizzes: '/quizzes/mine',
+  createQuiz: '/quizzes/create',
+  quiz: (id: string) => `/quizzes/${id}`,
+  attempt: (id: string) => `/quizzes/${id}/attempt`,
+  editQuiz: (id: string) => `/quizzes/${id}/edit`,
+  profile: '/profile',
+  admin: '/admin',
+} as const;

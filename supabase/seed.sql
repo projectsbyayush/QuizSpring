@@ -1,0 +1,2 @@
+-- Default categories and the optional administrator are applied by Flyway and
+-- the backend seeder. No client-side seed data is used by the application.

@@ -1,0 +1,18 @@
+<svg width="360" height="260" viewBox="0 0 360 260" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <ellipse cx="180" cy="232" rx="128" ry="12" fill="#E4E7EC"/>
+  <rect x="88" y="76" width="80" height="126" rx="36" fill="#0B63E5"/>
+  <circle cx="114" cy="116" r="9" fill="#FFFFFF"/>
+  <circle cx="142" cy="116" r="9" fill="#FFFFFF"/>
+  <circle cx="114" cy="116" r="4" fill="#1D1D1F"/>
+  <circle cx="142" cy="116" r="4" fill="#1D1D1F"/>
+  <path d="M116 138Q128 147 140 138" stroke="#FFFFFF" stroke-width="5" stroke-linecap="round"/>
+  <path d="M94 122L66 96" stroke="#0B63E5" stroke-width="12" stroke-linecap="round"/>
+  <path d="M162 122L190 96" stroke="#0B63E5" stroke-width="12" stroke-linecap="round"/>
+  <path d="M212 74H268V124L240 142L232 124H212V74Z" fill="#FF9F0A"/>
+  <path d="M228 96L236 104L250 88" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="52" y="160" width="18" height="18" rx="5" transform="rotate(18 52 160)" fill="#6D28D9"/>
+  <circle cx="300" cy="160" r="8" fill="#1F9D4D"/>
+  <path d="M292 72L295 79L302 82L295 85L292 92L289 85L282 82L289 79Z" fill="#FF9F0A"/>
+  <rect x="238" y="176" width="72" height="14" rx="7" fill="#D7DCE5"/>
+  <rect x="248" y="198" width="52" height="12" rx="6" fill="#E4E7EC"/>
+</svg>

@@ -1,0 +1,4 @@
+-- The Spring Boot application owns the database schema.
+-- Run backend/src/main/resources/db/migration/V1__initial_schema.sql through Flyway.
+-- Do not use the former client-side prototype schema: quiz scoring, roles, and
+-- refresh tokens must remain server-authoritative.
