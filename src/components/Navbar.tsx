@@ -5,6 +5,7 @@ import {
   Avatar,
   Box,
   Button,
+  Chip,
   Container,
   Divider,
   IconButton,
@@ -18,6 +19,7 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import { useAuth } from '../contexts/AuthContext';
 import { useColorMode } from '../contexts/ColorModeContext';
+import { DEMO_MODE } from '../lib/config';
 
 export default function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -143,6 +145,14 @@ export default function Navbar() {
             <Box sx={{ lineHeight: 1 }}>
               <Typography variant="h6" fontWeight={800} letterSpacing="-0.03em">
                 QuizSpring
+                {DEMO_MODE && (
+                  <Chip
+                    size="small"
+                    label="Demo"
+                    color="secondary"
+                    sx={{ ml: 1, verticalAlign: 'middle', fontWeight: 800 }}
+                  />
+                )}
               </Typography>
               <Typography
                 variant="caption"

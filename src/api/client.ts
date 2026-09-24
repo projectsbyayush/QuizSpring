@@ -1,5 +1,6 @@
 import axios, { type InternalAxiosRequestConfig } from 'axios';
-import { API_BASE_URL } from '../lib/config';
+import { API_BASE_URL, DEMO_MODE } from '../lib/config';
+import { mockAdapter } from './mockAdapter';
 import { clearStoredSession, getStoredSession, storeSession, type StoredSession } from '../lib/tokenStore';
 import type { ApiErrorPayload, AuthResponse } from '../types';
 
@@ -9,6 +10,7 @@ export const SESSION_EXPIRED_EVENT = 'quizspring:session-expired';
 export const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: 90000,
+  adapter: DEMO_MODE ? mockAdapter : undefined,
   headers: {
     'Content-Type': 'application/json',
     Accept: 'application/json',
