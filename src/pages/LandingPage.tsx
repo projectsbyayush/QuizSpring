@@ -124,7 +124,14 @@ export default function LandingPage() {
                   size="large"
                   disabled={demoPending}
                   onClick={() => void tryDemo()}
-                  sx={{ mt: 1, ml: { xs: 0, sm: -1 } }}
+                  sx={{
+                    mt: 1,
+                    ml: { xs: 0, sm: -1 },
+                    color: 'primary.main',
+                    fontWeight: 700,
+                    textDecoration: 'none',
+                    '&:hover': { textDecoration: 'underline', backgroundColor: 'transparent' },
+                  }}
                 >
                   {demoPending ? 'Creating your demo…' : 'Just looking? Try a demo account →'}
                 </Button>
