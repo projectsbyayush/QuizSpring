@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState, type MouseEvent as ReactMouseEvent } from 'react';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -26,6 +26,13 @@ export default function Navbar() {
   const location = useLocation();
   const [accountAnchor, setAccountAnchor] = useState<HTMLElement | null>(null);
   const [mobileAnchor, setMobileAnchor] = useState<HTMLElement | null>(null);
+  const [hash, setHash] = useState(() => (typeof window === 'undefined' ? '' : window.location.hash));
+
+  useEffect(() => {
+    const syncHash = (): void => setHash(window.location.hash);
+    window.addEventListener('hashchange', syncHash);
+    return () => window.removeEventListener('hashchange', syncHash);
+  }, []);
 
   const displayName = user?.username || user?.email.split('@')[0] || 'Account';
   interface NavEntry {
@@ -46,7 +53,7 @@ export default function Navbar() {
   ];
 
   const isActive = (link: { to?: string; section?: string }): boolean => {
-    if (link.section) return location.pathname === '/' && location.hash === `#${link.section}`;
+    if (link.section) return location.pathname === '/' && hash === `#${link.section}`;
     const to = link.to ?? '/';
     if (to === '/') return location.pathname === '/';
     if (to === '/quizzes') {
@@ -81,8 +88,16 @@ export default function Navbar() {
 
   const closeMobileMenu = (): void => setMobileAnchor(null);
 
+  const openAccountMenu = (event: ReactMouseEvent<HTMLElement>): void => {
+    setAccountAnchor(event.currentTarget);
+    void import('../pages/ProfilePage');
+    void import('../pages/ProfileEditPage');
+    void import('../pages/AuthPages');
+  };
+
   const scrollToSection = (section: string): void => {
     closeMobileMenu();
+    setHash(`#${section}`);
     const scroll = (): void => {
       document.getElementById(section)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     };
@@ -210,11 +225,7 @@ export default function Navbar() {
                   </MenuItem>
                 )}
               </Menu>
-              <IconButton
-                onClick={(event) => setAccountAnchor(event.currentTarget)}
-                size="small"
-                aria-label="Open account menu"
-              >
+              <IconButton onClick={openAccountMenu} size="small" aria-label="Open account menu">
                 <Avatar
                   src={user.avatar_url ?? undefined}
                   sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontWeight: 700 }}
