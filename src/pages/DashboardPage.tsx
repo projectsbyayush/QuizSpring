@@ -131,7 +131,7 @@ export default function DashboardPage() {
       </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '7fr 5fr' }, gap: 3, alignItems: 'stretch' }}>
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
             <Typography variant="h5" fontWeight={800}>
               Recent activity
@@ -175,7 +175,7 @@ export default function DashboardPage() {
             </Stack>
           )}
         </Box>
-        <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
             <Typography variant="h5" fontWeight={800}>
               Recommended for you

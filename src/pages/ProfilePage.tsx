@@ -123,7 +123,7 @@ export default function ProfilePage() {
       </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '7fr 5fr' }, gap: 3 }}>
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <Typography variant="h6" fontWeight={800} gutterBottom>
             Attempt history
           </Typography>
@@ -169,7 +169,7 @@ export default function ProfilePage() {
             />
           )}
         </Box>
-        <Box>
+        <Box sx={{ minWidth: 0 }}>
           <Typography variant="h6" fontWeight={800} gutterBottom>
             Favorite categories
           </Typography>
