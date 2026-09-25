@@ -83,7 +83,16 @@ export default function LandingPage() {
           borderColor: 'divider',
         }}
       >
-        <Box sx={{ py: { xs: 10, md: 14 } }}>
+        <Box
+          sx={{
+            py: { xs: 10, md: 14 },
+            backgroundImage: (theme) =>
+              theme.palette.mode === 'light'
+                ? 'radial-gradient(circle, #d3d7de 1.2px, transparent 1.3px)'
+                : 'radial-gradient(circle, rgba(148,163,184,0.28) 1.2px, transparent 1.3px)',
+            backgroundSize: '22px 22px',
+          }}
+        >
           <Container maxWidth="lg">
             <Box
               sx={{
