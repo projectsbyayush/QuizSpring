@@ -1,4 +1,4 @@
-import { useEffect, useState, type MouseEvent as ReactMouseEvent } from 'react';
+import { useEffect, useState, type MouseEvent as ReactMouseEvent, type ReactNode } from 'react';
 import { Link as RouterLink, useLocation, useNavigate } from 'react-router-dom';
 import {
   AppBar,
@@ -8,8 +8,8 @@ import {
   Container,
   Divider,
   IconButton,
-  Menu,
   MenuItem,
+  Paper,
   Toolbar,
   Typography,
 } from '@mui/material';
@@ -18,6 +18,43 @@ import LightModeOutlinedIcon from '@mui/icons-material/LightModeOutlined';
 import MenuOutlinedIcon from '@mui/icons-material/MenuOutlined';
 import { useAuth } from '../contexts/AuthContext';
 import { useColorMode } from '../contexts/ColorModeContext';
+
+function HeaderMenu({ open, onClose, children }: { open: boolean; onClose: () => void; children: ReactNode }) {
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (event: KeyboardEvent): void => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [open, onClose]);
+
+  if (!open) return null;
+  return (
+    <>
+      <Box
+        sx={{ position: 'fixed', inset: 0, zIndex: 1299, backgroundColor: 'transparent' }}
+        onClick={onClose}
+        aria-hidden
+      />
+      <Paper
+        elevation={6}
+        sx={{
+          position: 'absolute',
+          top: 'calc(100% + 8px)',
+          right: 0,
+          minWidth: 230,
+          zIndex: 1300,
+          borderRadius: 3,
+          overflow: 'hidden',
+          py: 0.5,
+        }}
+      >
+        {children}
+      </Paper>
+    </>
+  );
+}
 
 export default function Navbar() {
   const { user, isAdmin, signOut } = useAuth();
@@ -193,67 +230,56 @@ export default function Navbar() {
 
           {user ? (
             <>
-              <IconButton
-                onClick={(event) => setMobileAnchor(event.currentTarget)}
-                aria-label="Open navigation menu"
-                sx={{ display: { xs: 'inline-flex', md: 'none' } }}
-              >
-                <MenuOutlinedIcon />
-              </IconButton>
-              <Menu
-                anchorEl={mobileAnchor}
-                open={Boolean(mobileAnchor)}
-                onClose={closeMobileMenu}
-                TransitionProps={{ timeout: 150 }}
-              >
-                {authenticatedLinks.map((link) => (
-                  <MenuItem
-                    key={link.label}
-                    component={RouterLink}
-                    to={link.to as string}
-                    selected={isActive(link)}
-                    onClick={closeMobileMenu}
-                  >
-                    {link.label}
-                  </MenuItem>
-                ))}
-                {isAdmin && (
-                  <MenuItem
-                    component={RouterLink}
-                    to="/admin"
-                    selected={isActive({ to: '/admin' })}
-                    onClick={closeMobileMenu}
-                  >
-                    Admin
-                  </MenuItem>
-                )}
-              </Menu>
-              <IconButton onClick={openAccountMenu} size="small" aria-label="Open account menu">
-                <Avatar
-                  src={user.avatar_url ?? undefined}
-                  sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontWeight: 700 }}
+              <Box sx={{ position: 'relative', display: { xs: 'block', md: 'none' } }}>
+                <IconButton
+                  onClick={(event) => setMobileAnchor(event.currentTarget)}
+                  aria-label="Open navigation menu"
                 >
-                  {displayName.charAt(0).toUpperCase()}
-                </Avatar>
-              </IconButton>
-              <Menu
-                anchorEl={accountAnchor}
-                open={Boolean(accountAnchor)}
-                onClose={() => setAccountAnchor(null)}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                marginThreshold={8}
-                TransitionProps={{ timeout: 150 }}
-              >
-                <Box sx={{ px: 2, py: 1 }}>
-                  <Typography variant="subtitle2" fontWeight={700}>
-                    {displayName}
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    {user.email}
-                  </Typography>
-                </Box>
-                <Divider />
+                  <MenuOutlinedIcon />
+                </IconButton>
+                <HeaderMenu open={Boolean(mobileAnchor)} onClose={closeMobileMenu}>
+                  {authenticatedLinks.map((link) => (
+                    <MenuItem
+                      key={link.label}
+                      component={RouterLink}
+                      to={link.to as string}
+                      selected={isActive(link)}
+                      onClick={closeMobileMenu}
+                    >
+                      {link.label}
+                    </MenuItem>
+                  ))}
+                  {isAdmin && (
+                    <MenuItem
+                      component={RouterLink}
+                      to="/admin"
+                      selected={isActive({ to: '/admin' })}
+                      onClick={closeMobileMenu}
+                    >
+                      Admin
+                    </MenuItem>
+                  )}
+                </HeaderMenu>
+              </Box>
+              <Box sx={{ position: 'relative' }}>
+                <IconButton onClick={openAccountMenu} size="small" aria-label="Open account menu">
+                  <Avatar
+                    src={user.avatar_url ?? undefined}
+                    sx={{ width: 34, height: 34, bgcolor: 'primary.main', fontWeight: 700 }}
+                  >
+                    {displayName.charAt(0).toUpperCase()}
+                  </Avatar>
+                </IconButton>
+                <HeaderMenu open={Boolean(accountAnchor)} onClose={() => setAccountAnchor(null)}>
+                  <Box sx={{ px: 2, py: 1 }}>
+                    <Typography variant="subtitle2" fontWeight={700}>
+                      {displayName}
+                    </Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      {user.email}
+                    </Typography>
+                  </Box>
+                  <Divider />
                 <MenuItem component={RouterLink} to="/dashboard" onClick={() => setAccountAnchor(null)}>
                   Dashboard
                 </MenuItem>
@@ -276,7 +302,8 @@ export default function Navbar() {
                 )}
                 <Divider />
                 <MenuItem onClick={() => void handleSignOut()}>Sign out</MenuItem>
-              </Menu>
+                </HeaderMenu>
+              </Box>
             </>
           ) : (
             <>
@@ -288,20 +315,15 @@ export default function Navbar() {
                   Get started
                 </Button>
               </Box>
-              <IconButton
-                onClick={(event) => setMobileAnchor(event.currentTarget)}
-                aria-label="Open navigation menu"
-                sx={{ display: { xs: 'inline-flex', sm: 'none' } }}
-              >
-                <MenuOutlinedIcon />
-              </IconButton>
-              <Menu
-                anchorEl={mobileAnchor}
-                open={Boolean(mobileAnchor)}
-                onClose={closeMobileMenu}
-                TransitionProps={{ timeout: 150 }}
-              >
-                {guestLinks.map((link) => {
+              <Box sx={{ position: 'relative', display: { xs: 'block', sm: 'none' } }}>
+                <IconButton
+                  onClick={(event) => setMobileAnchor(event.currentTarget)}
+                  aria-label="Open navigation menu"
+                >
+                  <MenuOutlinedIcon />
+                </IconButton>
+                <HeaderMenu open={Boolean(mobileAnchor)} onClose={closeMobileMenu}>
+                  {guestLinks.map((link) => {
                   if (link.section) {
                     return (
                       <MenuItem
@@ -331,7 +353,8 @@ export default function Navbar() {
                 <MenuItem component={RouterLink} to="/signup" onClick={closeMobileMenu}>
                   Get started
                 </MenuItem>
-              </Menu>
+                </HeaderMenu>
+              </Box>
             </>
           )}
         </Toolbar>
