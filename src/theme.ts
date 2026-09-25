@@ -55,7 +55,7 @@ function buildTheme(mode: 'light' | 'dark') {
             WebkitFontSmoothing: 'antialiased',
             MozOsxFontSmoothing: 'grayscale',
             textRendering: 'optimizeLegibility',
-            overflowX: 'clip',
+            overflowX: 'hidden',
             scrollbarWidth: 'thin',
             scrollbarColor: light ? '#7cc0ff transparent' : '#4da3ff transparent',
           },

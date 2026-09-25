@@ -34,6 +34,11 @@ export default function Navbar() {
     return () => window.removeEventListener('hashchange', syncHash);
   }, []);
 
+  useEffect(() => {
+    setAccountAnchor(null);
+    setMobileAnchor(null);
+  }, [location.pathname]);
+
   const displayName = user?.username || user?.email.split('@')[0] || 'Account';
   interface NavEntry {
     label: string;
@@ -235,6 +240,9 @@ export default function Navbar() {
                 anchorEl={accountAnchor}
                 open={Boolean(accountAnchor)}
                 onClose={() => setAccountAnchor(null)}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                marginThreshold={8}
                 TransitionProps={{ timeout: 150 }}
               >
                 <Box sx={{ px: 2, py: 1 }}>
