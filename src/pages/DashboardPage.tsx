@@ -103,6 +103,7 @@ export default function DashboardPage() {
           value={stats.attempted}
           sub="quizzes played"
           icon={<QuizOutlinedIcon color="primary" />}
+          accent="primary.main"
         />
         <StatCard
           label="Total XP"
@@ -110,6 +111,7 @@ export default function DashboardPage() {
           sub={`Level ${stats.level}`}
           icon={<BoltOutlinedIcon color="secondary" />}
           progress={progress.pct}
+          accent="secondary.main"
         />
         <StatCard
           label="Accuracy"
@@ -117,12 +119,14 @@ export default function DashboardPage() {
           sub="correct answers"
           icon={<TrackChangesOutlinedIcon color="success" />}
           progress={stats.accuracy}
+          accent="success.main"
         />
         <StatCard
           label="Day streak"
           value={stats.streak}
           sub={stats.created ? `${stats.created} quizzes created` : 'keep it going'}
           icon={<LocalFireDepartmentOutlinedIcon color="warning" />}
+          accent="warning.main"
         />
       </Box>
 

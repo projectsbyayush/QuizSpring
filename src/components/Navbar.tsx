@@ -70,20 +70,8 @@ export default function Navbar() {
     borderRadius: 2,
     paddingLeft: 1.5,
     paddingRight: 1.5,
-    position: 'relative',
-    '&:hover': { color: 'text.primary', backgroundColor: 'transparent' },
-    '&::after': active
-      ? {
-          content: '""',
-          position: 'absolute',
-          left: 12,
-          right: 12,
-          bottom: 6,
-          height: 3,
-          borderRadius: 99,
-          backgroundColor: 'primary.main',
-        }
-      : {},
+    textDecoration: 'none',
+    '&:hover': { color: active ? 'primary.main' : 'text.primary', backgroundColor: 'transparent' },
   });
 
   const closeMobileMenu = (): void => setMobileAnchor(null);

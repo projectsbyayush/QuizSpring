@@ -14,18 +14,21 @@ const highlights = [
   {
     image: '/photo-library.jpg',
     alt: 'Students studying among bookshelves in a library',
+    accent: 'primary.main',
     title: 'Quizzes with a clear structure',
     text: 'Questions, answers, explanations, and timing stay together in one readable place.',
   },
   {
     image: '/photo-group.jpg',
     alt: 'Students collaborating over books and a laptop',
+    accent: 'secondary.main',
     title: 'Feedback that teaches',
     text: 'Review performance, accuracy, and XP without hunting through disconnected pages.',
   },
   {
     image: '/photo-writing.jpg',
     alt: 'A person writing notes in a notebook at a desk',
+    accent: 'success.main',
     title: 'Made for creators too',
     text: 'Write questions once, publish deliberately, and keep drafts separate from live quizzes.',
   },
@@ -130,7 +133,7 @@ export default function LandingPage() {
                     color: 'primary.main',
                     fontWeight: 700,
                     textDecoration: 'none',
-                    '&:hover': { textDecoration: 'underline', backgroundColor: 'transparent' },
+                    '&:hover': { backgroundColor: 'rgba(0,113,227,0.06)' },
                   }}
                 >
                   {demoPending ? 'Creating your demo…' : 'Just looking? Try a demo account →'}
@@ -227,7 +230,10 @@ export default function LandingPage() {
               }}
             >
               {highlights.map((highlight) => (
-                <Card key={highlight.title} sx={{ height: '100%', display: 'flex' }}>
+                <Card
+                  key={highlight.title}
+                  sx={{ height: '100%', display: 'flex', borderTop: '4px solid', borderTopColor: highlight.accent }}
+                >
                   <CardContent sx={{ p: 4, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
                     <Box
                       component="img"

@@ -99,15 +99,27 @@ export default function ProfilePage() {
           value={profile.total_xp.toLocaleString()}
           sub={`Level ${progress.level}`}
           progress={progress.pct}
+          accent="primary.main"
         />
         <StatCard
           label="Attempted"
           value={dashboard?.stats.attempted ?? 0}
           sub={`${accuracy?.correct ?? 0}/${accuracy?.total ?? 0} correct`}
+          accent="secondary.main"
         />
-        <StatCard label="Accuracy" value={`${accuracy?.percentage ?? 0}%`} progress={accuracy?.percentage ?? 0} />
-        <StatCard label="Day streak" value={profile.streak} sub="Keep your momentum" />
-        <StatCard label="Quizzes created" value={dashboard?.stats.created ?? 0} sub="Published and drafts" />
+        <StatCard
+          label="Accuracy"
+          value={`${accuracy?.percentage ?? 0}%`}
+          progress={accuracy?.percentage ?? 0}
+          accent="success.main"
+        />
+        <StatCard label="Day streak" value={profile.streak} sub="Keep your momentum" accent="warning.main" />
+        <StatCard
+          label="Quizzes created"
+          value={dashboard?.stats.created ?? 0}
+          sub="Published and drafts"
+          accent="info.main"
+        />
       </Box>
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '7fr 5fr' }, gap: 3 }}>

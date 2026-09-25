@@ -7,15 +7,17 @@ export default function StatCard({
   sub,
   icon,
   progress,
+  accent = 'transparent',
 }: {
   label: string;
   value: string | number;
   sub?: string;
   icon?: ReactNode;
   progress?: number;
+  accent?: string;
 }) {
   return (
-    <Card sx={{ height: '100%' }}>
+    <Card sx={{ height: '100%', borderTop: '4px solid', borderTopColor: accent }}>
       <CardContent>
         <Box display="flex" alignItems="center" justifyContent="space-between" mb={1} gap={1}>
           <Typography variant="subtitle2" color="text.secondary" fontWeight={600}>
