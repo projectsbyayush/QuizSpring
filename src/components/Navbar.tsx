@@ -90,9 +90,16 @@ export default function Navbar() {
 
   const openAccountMenu = (event: ReactMouseEvent<HTMLElement>): void => {
     setAccountAnchor(event.currentTarget);
-    void import('../pages/ProfilePage');
-    void import('../pages/ProfileEditPage');
-    void import('../pages/AuthPages');
+    const prefetch = (): void => {
+      void import('../pages/ProfilePage');
+      void import('../pages/ProfileEditPage');
+      void import('../pages/AuthPages');
+    };
+    const idleWindow = window as Window & {
+      requestIdleCallback?: (callback: () => void, options?: { timeout: number }) => void;
+    };
+    if (idleWindow.requestIdleCallback) idleWindow.requestIdleCallback(prefetch, { timeout: 2000 });
+    else window.setTimeout(prefetch, 0);
   };
 
   const scrollToSection = (section: string): void => {
@@ -210,7 +217,12 @@ export default function Navbar() {
               >
                 <MenuOutlinedIcon />
               </IconButton>
-              <Menu anchorEl={mobileAnchor} open={Boolean(mobileAnchor)} onClose={closeMobileMenu}>
+              <Menu
+                anchorEl={mobileAnchor}
+                open={Boolean(mobileAnchor)}
+                onClose={closeMobileMenu}
+                TransitionProps={{ timeout: 150 }}
+              >
                 {authenticatedLinks.map((link) => (
                   <MenuItem
                     key={link.label}
@@ -241,7 +253,12 @@ export default function Navbar() {
                   {displayName.charAt(0).toUpperCase()}
                 </Avatar>
               </IconButton>
-              <Menu anchorEl={accountAnchor} open={Boolean(accountAnchor)} onClose={() => setAccountAnchor(null)}>
+              <Menu
+                anchorEl={accountAnchor}
+                open={Boolean(accountAnchor)}
+                onClose={() => setAccountAnchor(null)}
+                TransitionProps={{ timeout: 150 }}
+              >
                 <Box sx={{ px: 2, py: 1 }}>
                   <Typography variant="subtitle2" fontWeight={700}>
                     {displayName}
@@ -292,7 +309,12 @@ export default function Navbar() {
               >
                 <MenuOutlinedIcon />
               </IconButton>
-              <Menu anchorEl={mobileAnchor} open={Boolean(mobileAnchor)} onClose={closeMobileMenu}>
+              <Menu
+                anchorEl={mobileAnchor}
+                open={Boolean(mobileAnchor)}
+                onClose={closeMobileMenu}
+                TransitionProps={{ timeout: 150 }}
+              >
                 {guestLinks.map((link) => {
                   if (link.section) {
                     return (

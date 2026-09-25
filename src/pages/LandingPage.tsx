@@ -99,7 +99,7 @@ export default function LandingPage() {
                   variant="outlined"
                   sx={{ mb: 3 }}
                 />
-                <Typography variant="h1" sx={{ fontSize: { xs: '3rem', sm: '4.2rem', md: '5.2rem' }, maxWidth: 740 }}>
+                <Typography variant="h1" sx={{ fontSize: { xs: '2.5rem', sm: '4.2rem', md: '5.2rem' }, maxWidth: 740 }}>
                   Turn practice into progress you can see.
                 </Typography>
                 <Typography

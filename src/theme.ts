@@ -55,9 +55,11 @@ function buildTheme(mode: 'light' | 'dark') {
             WebkitFontSmoothing: 'antialiased',
             MozOsxFontSmoothing: 'grayscale',
             textRendering: 'optimizeLegibility',
+            overflowX: 'clip',
             scrollbarWidth: 'thin',
             scrollbarColor: light ? '#7cc0ff transparent' : '#4da3ff transparent',
           },
+          img: { maxWidth: '100%' },
           '*::-webkit-scrollbar': { width: 10, height: 10 },
           '*::-webkit-scrollbar-track': { background: 'transparent' },
           '*::-webkit-scrollbar-thumb': {
@@ -66,7 +68,10 @@ function buildTheme(mode: 'light' | 'dark') {
             border: '2px solid transparent',
             backgroundClip: 'content-box',
           },
-          '*::-webkit-scrollbar-thumb:hover': { background: light ? '#3395f0' : '#7cc0ff', backgroundClip: 'content-box' },
+          '*::-webkit-scrollbar-thumb:hover': {
+            background: light ? '#3395f0' : '#7cc0ff',
+            backgroundClip: 'content-box',
+          },
           '::selection': { background: light ? 'rgba(0,113,227,0.2)' : 'rgba(77,163,255,0.28)' },
         },
       },
