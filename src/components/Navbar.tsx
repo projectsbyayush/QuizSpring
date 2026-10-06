@@ -85,7 +85,6 @@ export default function Navbar() {
   const authenticatedLinks: NavEntry[] = [
     { label: 'Explore', to: '/quizzes' },
     { label: 'My quizzes', to: '/quizzes/mine' },
-    { label: 'Create', to: '/quizzes/create' },
   ];
   const guestLinks: NavEntry[] = [
     { label: 'Features', section: 'features' },
@@ -231,10 +230,7 @@ export default function Navbar() {
           {user ? (
             <>
               <Box sx={{ position: 'relative', display: { xs: 'block', md: 'none' } }}>
-                <IconButton
-                  onClick={(event) => setMobileAnchor(event.currentTarget)}
-                  aria-label="Open navigation menu"
-                >
+                <IconButton onClick={(event) => setMobileAnchor(event.currentTarget)} aria-label="Open navigation menu">
                   <MenuOutlinedIcon />
                 </IconButton>
                 <HeaderMenu open={Boolean(mobileAnchor)} onClose={closeMobileMenu}>
@@ -249,6 +245,14 @@ export default function Navbar() {
                       {link.label}
                     </MenuItem>
                   ))}
+                  <MenuItem
+                    component={RouterLink}
+                    to="/quizzes/create"
+                    selected={isActive({ to: '/quizzes/create' })}
+                    onClick={closeMobileMenu}
+                  >
+                    Create
+                  </MenuItem>
                   {isAdmin && (
                     <MenuItem
                       component={RouterLink}
@@ -280,28 +284,22 @@ export default function Navbar() {
                     </Typography>
                   </Box>
                   <Divider />
-                <MenuItem component={RouterLink} to="/dashboard" onClick={() => setAccountAnchor(null)}>
-                  Dashboard
-                </MenuItem>
-                <MenuItem component={RouterLink} to="/profile" onClick={() => setAccountAnchor(null)}>
-                  Profile
-                </MenuItem>
-                <MenuItem component={RouterLink} to="/quizzes" onClick={() => setAccountAnchor(null)}>
-                  Explore quizzes
-                </MenuItem>
-                <MenuItem component={RouterLink} to="/quizzes/mine" onClick={() => setAccountAnchor(null)}>
-                  My quizzes
-                </MenuItem>
-                <MenuItem component={RouterLink} to="/quizzes/create" onClick={() => setAccountAnchor(null)}>
-                  Create quiz
-                </MenuItem>
-                {isAdmin && (
-                  <MenuItem component={RouterLink} to="/admin" onClick={() => setAccountAnchor(null)}>
-                    Admin panel
+                  <MenuItem component={RouterLink} to="/dashboard" onClick={() => setAccountAnchor(null)}>
+                    Dashboard
                   </MenuItem>
-                )}
-                <Divider />
-                <MenuItem onClick={() => void handleSignOut()}>Sign out</MenuItem>
+                  <MenuItem component={RouterLink} to="/profile" onClick={() => setAccountAnchor(null)}>
+                    Profile
+                  </MenuItem>
+                  <MenuItem component={RouterLink} to="/quizzes/create" onClick={() => setAccountAnchor(null)}>
+                    Create quiz
+                  </MenuItem>
+                  {isAdmin && (
+                    <MenuItem component={RouterLink} to="/admin" onClick={() => setAccountAnchor(null)}>
+                      Admin panel
+                    </MenuItem>
+                  )}
+                  <Divider />
+                  <MenuItem onClick={() => void handleSignOut()}>Sign out</MenuItem>
                 </HeaderMenu>
               </Box>
             </>
@@ -316,43 +314,40 @@ export default function Navbar() {
                 </Button>
               </Box>
               <Box sx={{ position: 'relative', display: { xs: 'block', sm: 'none' } }}>
-                <IconButton
-                  onClick={(event) => setMobileAnchor(event.currentTarget)}
-                  aria-label="Open navigation menu"
-                >
+                <IconButton onClick={(event) => setMobileAnchor(event.currentTarget)} aria-label="Open navigation menu">
                   <MenuOutlinedIcon />
                 </IconButton>
                 <HeaderMenu open={Boolean(mobileAnchor)} onClose={closeMobileMenu}>
                   {guestLinks.map((link) => {
-                  if (link.section) {
+                    if (link.section) {
+                      return (
+                        <MenuItem
+                          key={link.label}
+                          selected={isActive(link)}
+                          onClick={() => scrollToSection(link.section as string)}
+                        >
+                          {link.label}
+                        </MenuItem>
+                      );
+                    }
                     return (
                       <MenuItem
                         key={link.label}
+                        component={RouterLink}
+                        to={link.to as string}
                         selected={isActive(link)}
-                        onClick={() => scrollToSection(link.section as string)}
+                        onClick={closeMobileMenu}
                       >
                         {link.label}
                       </MenuItem>
                     );
-                  }
-                  return (
-                    <MenuItem
-                      key={link.label}
-                      component={RouterLink}
-                      to={link.to as string}
-                      selected={isActive(link)}
-                      onClick={closeMobileMenu}
-                    >
-                      {link.label}
-                    </MenuItem>
-                  );
-                })}
-                <MenuItem component={RouterLink} to="/login" onClick={closeMobileMenu}>
-                  Sign in
-                </MenuItem>
-                <MenuItem component={RouterLink} to="/signup" onClick={closeMobileMenu}>
-                  Get started
-                </MenuItem>
+                  })}
+                  <MenuItem component={RouterLink} to="/login" onClick={closeMobileMenu}>
+                    Sign in
+                  </MenuItem>
+                  <MenuItem component={RouterLink} to="/signup" onClick={closeMobileMenu}>
+                    Get started
+                  </MenuItem>
                 </HeaderMenu>
               </Box>
             </>

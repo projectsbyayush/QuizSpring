@@ -2,29 +2,30 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
-  Box,
   Button,
-  Card,
   Dialog,
   DialogActions,
   DialogContent,
   DialogTitle,
-  IconButton,
   Stack,
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
   Typography,
 } from '@mui/material';
+import AddIcon from '@mui/icons-material/Add';
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
 import { createAdminCategory, deleteAdminCategory, updateAdminCategory } from '../../api/admin';
 import { getErrorMessage } from '../../api/client';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { ErrorState, Loading } from '../../components/Feedback';
+import RowActionsMenu from '../../components/admin/RowActionsMenu';
+import { AdminPage } from '../../components/admin/AdminPage';
 import { useAdminCategoriesQuery } from '../../hooks/useAdmin';
 import type { Category, CategoryInput } from '../../types';
 
@@ -35,7 +36,6 @@ export default function AdminCategoriesPage() {
   const [editing, setEditing] = useState<Category | null>(null);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
-  const [icon, setIcon] = useState('');
   const [deleteTarget, setDeleteTarget] = useState<Category | null>(null);
 
   const closeDialog = (): void => {
@@ -47,7 +47,6 @@ export default function AdminCategoriesPage() {
     setEditing(null);
     setName('');
     setDescription('');
-    setIcon('');
     setOpen(true);
   };
 
@@ -55,52 +54,66 @@ export default function AdminCategoriesPage() {
     setEditing(category);
     setName(category.name);
     setDescription(category.description ?? '');
-    setIcon(category.icon ?? '');
     setOpen(true);
   };
 
   const saveMutation = useMutation({
     mutationFn: (input: CategoryInput) =>
       editing ? updateAdminCategory(editing.id, input) : createAdminCategory(input),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
-      await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      void queryClient.invalidateQueries({ queryKey: ['categories'] });
       closeDialog();
     },
   });
   const deleteMutation = useMutation({
     mutationFn: deleteAdminCategory,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
-      await queryClient.invalidateQueries({ queryKey: ['categories'] });
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'categories'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      void queryClient.invalidateQueries({ queryKey: ['categories'] });
     },
   });
 
+  const mutationError = saveMutation.error ?? deleteMutation.error;
+  const categories = query.data ?? [];
+
   const save = (): void => {
     if (!name.trim()) return;
-    saveMutation.mutate({ name: name.trim(), description: description.trim() || null, icon: icon.trim() || null });
+    saveMutation.mutate({ name: name.trim(), description: description.trim() || null, icon: null });
   };
 
   return (
-    <Box>
-      <Stack direction="row" alignItems="center" justifyContent="space-between" mb={2}>
-        <Typography variant="h4" fontWeight={800}>
-          Categories
-        </Typography>
-        <Button variant="contained" onClick={openNew}>
+    <AdminPage
+      title="Categories"
+      description="Organise the catalogue. Categories used by quizzes cannot be deleted."
+      actions={
+        <Button variant="contained" size="small" startIcon={<AddIcon />} onClick={openNew}>
           New category
         </Button>
-      </Stack>
+      }
+      resultSummary={
+        query.isFetching ? 'Updating…' : `${categories.length} ${categories.length === 1 ? 'category' : 'categories'}`
+      }
+    >
+      {mutationError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {getErrorMessage(mutationError)}
+        </Alert>
+      )}
+
       {query.isLoading ? (
-        <Loading />
+        <Loading label="Loading categories…" />
       ) : query.isError ? (
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
       ) : (
-        <Card sx={{ overflow: 'auto' }}>
+        <TableContainer
+          sx={{ border: 1, borderColor: 'divider', borderRadius: 4, backgroundColor: 'background.paper' }}
+        >
           <Table size="small">
             <TableHead>
               <TableRow>
-                <TableCell>Icon</TableCell>
                 <TableCell>Name</TableCell>
                 <TableCell>Slug</TableCell>
                 <TableCell>Description</TableCell>
@@ -108,10 +121,17 @@ export default function AdminCategoriesPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {query.data?.length ? (
-                query.data.map((category) => (
-                  <TableRow key={category.id}>
-                    <TableCell>{category.icon}</TableCell>
+              {categories.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={4}>
+                    <Typography color="text.secondary" textAlign="center" sx={{ py: 6 }}>
+                      No categories yet. Create one to organise your quizzes.
+                    </Typography>
+                  </TableCell>
+                </TableRow>
+              ) : (
+                categories.map((category) => (
+                  <TableRow key={category.id} hover>
                     <TableCell>
                       <Typography fontWeight={600}>{category.name}</Typography>
                     </TableCell>
@@ -121,46 +141,41 @@ export default function AdminCategoriesPage() {
                       </Typography>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" color="text.secondary">
+                      <Typography variant="body2" color="text.secondary" noWrap sx={{ maxWidth: 320 }}>
                         {category.description || '—'}
                       </Typography>
                     </TableCell>
                     <TableCell align="right">
-                      <IconButton onClick={() => openEdit(category)} aria-label={`Edit ${category.name}`}>
-                        <EditOutlinedIcon />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        onClick={() => setDeleteTarget(category)}
-                        aria-label={`Delete ${category.name}`}
-                      >
-                        <DeleteOutlineIcon />
-                      </IconButton>
+                      <RowActionsMenu
+                        label={`Actions for ${category.name}`}
+                        actions={[
+                          {
+                            label: 'Edit',
+                            icon: <EditOutlinedIcon fontSize="small" />,
+                            onSelect: () => openEdit(category),
+                          },
+                          {
+                            label: 'Delete',
+                            icon: <DeleteOutlineIcon fontSize="small" />,
+                            color: 'error',
+                            disabled: deleteMutation.isPending,
+                            onSelect: () => setDeleteTarget(category),
+                          },
+                        ]}
+                      />
                     </TableCell>
                   </TableRow>
                 ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={5}>
-                    <Typography color="text.secondary" textAlign="center" sx={{ py: 4 }}>
-                      No categories yet.
-                    </Typography>
-                  </TableCell>
-                </TableRow>
               )}
             </TableBody>
           </Table>
-        </Card>
+        </TableContainer>
       )}
-      {(saveMutation.isError || deleteMutation.isError) && (
-        <Alert severity="error" sx={{ mt: 2 }}>
-          {getErrorMessage(saveMutation.error ?? deleteMutation.error)}
-        </Alert>
-      )}
+
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Delete category?"
-        message={`Delete ${deleteTarget?.name ?? 'this category'}? Categories used by quizzes cannot be deleted.`}
+        message={`${deleteTarget?.name ?? 'This category'} will be removed. Categories in use by a quiz cannot be deleted.`}
         confirmLabel="Delete category"
         destructive
         busy={deleteMutation.isPending}
@@ -169,16 +184,18 @@ export default function AdminCategoriesPage() {
           if (deleteTarget) deleteMutation.mutate(deleteTarget.id, { onSettled: () => setDeleteTarget(null) });
         }}
       />
-      <Dialog open={open} onClose={closeDialog} fullWidth maxWidth="sm">
+
+      <Dialog open={open} onClose={closeDialog} fullWidth maxWidth="xs">
         <DialogTitle>{editing ? 'Edit category' : 'New category'}</DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 1 }}>
-            <TextField label="Name" value={name} onChange={(event) => setName(event.target.value)} fullWidth required />
             <TextField
-              label="Icon (optional short label)"
-              value={icon}
-              onChange={(event) => setIcon(event.target.value)}
+              label="Name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
               fullWidth
+              required
+              autoFocus
             />
             <TextField
               label="Description"
@@ -197,6 +214,6 @@ export default function AdminCategoriesPage() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </AdminPage>
   );
 }

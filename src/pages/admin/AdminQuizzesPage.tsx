@@ -2,9 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   Alert,
-  Box,
   Button,
-  Card,
   Chip,
   MenuItem,
   Pagination,
@@ -13,77 +11,90 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableContainer,
   TableHead,
   TableRow,
   TextField,
   Typography,
 } from '@mui/material';
-import { Link as RouterLink } from 'react-router-dom';
+import AddIcon from '@mui/icons-material/Add';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined';
+import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
+import { Link as RouterLink, useNavigate } from 'react-router-dom';
 import { deleteAdminQuiz, setQuizPublished } from '../../api/admin';
 import { getErrorMessage } from '../../api/client';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { ErrorState, Loading } from '../../components/Feedback';
+import RowActionsMenu from '../../components/admin/RowActionsMenu';
+import { AdminPage, AdminToolbar, SearchField } from '../../components/admin/AdminPage';
 import { useAdminQuizzesQuery } from '../../hooks/useAdmin';
 import { useCategoriesQuery } from '../../hooks/useQuizzes';
 import type { QuizSummary } from '../../types';
 
+type PublishedFilter = 'all' | 'published' | 'draft';
+
 export default function AdminQuizzesPage() {
+  const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(0);
   const [categoryId, setCategoryId] = useState('');
   const [difficulty, setDifficulty] = useState('all');
+  const [published, setPublished] = useState<PublishedFilter>('all');
   const [deleteTarget, setDeleteTarget] = useState<QuizSummary | null>(null);
+
   const categoriesQuery = useCategoriesQuery();
-  const query = useAdminQuizzesQuery(search, categoryId, difficulty, page);
+  const query = useAdminQuizzesQuery(search, categoryId, difficulty, published, page);
+
   const publishMutation = useMutation({
-    mutationFn: ({ id, published }: { id: string; published: boolean }) => setQuizPublished(id, published),
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'quizzes'] });
-      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+    mutationFn: ({ id, next }: { id: string; next: boolean }) => setQuizPublished(id, next),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'quizzes'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      void queryClient.invalidateQueries({ queryKey: ['quizzes'] });
     },
   });
   const deleteMutation = useMutation({
     mutationFn: deleteAdminQuiz,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ['admin', 'quizzes'] });
-      await queryClient.invalidateQueries({ queryKey: ['quizzes'] });
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'quizzes'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      void queryClient.invalidateQueries({ queryKey: ['quizzes'] });
     },
   });
 
+  const mutationError = publishMutation.error ?? deleteMutation.error;
+  const quizzes = query.data?.content ?? [];
+  const total = query.data?.total_elements ?? 0;
+
+  const updateSearch = (value: string): void => {
+    setSearch(value);
+    setPage(0);
+  };
+
   return (
-    <Box>
-      <Stack direction={{ xs: 'column', sm: 'row' }} justifyContent="space-between" gap={2} mb={2}>
-        <Box>
-          <Typography variant="h4" fontWeight={800}>
-            Quizzes
-          </Typography>
-          <Typography color="text.secondary">Review publishing status and moderate content.</Typography>
-        </Box>
-        <Button component={RouterLink} to="/quizzes/create" variant="contained">
+    <AdminPage
+      title="Quizzes"
+      description="Review publishing status and moderate content."
+      actions={
+        <Button component={RouterLink} to="/quizzes/create" variant="contained" size="small" startIcon={<AddIcon />}>
           New quiz
         </Button>
-      </Stack>
-      <TextField
-        fullWidth
-        placeholder="Search title…"
-        value={search}
-        onChange={(event) => {
-          setSearch(event.target.value);
-          setPage(0);
-        }}
-        sx={{ mb: 2 }}
-      />
-      <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mb: 2 }}>
+      }
+      resultSummary={query.isFetching ? 'Updating…' : `${total} ${total === 1 ? 'quiz' : 'quizzes'}`}
+    >
+      <AdminToolbar>
+        <SearchField value={search} onChange={updateSearch} placeholder="Search quiz titles" />
         <TextField
           select
-          label="Category"
+          size="small"
           value={categoryId}
           onChange={(event) => {
             setCategoryId(event.target.value);
             setPage(0);
           }}
-          sx={{ minWidth: 190 }}
+          sx={{ minWidth: 165 }}
         >
           <MenuItem value="">All categories</MenuItem>
           {(categoriesQuery.data ?? []).map((category) => (
@@ -94,119 +105,157 @@ export default function AdminQuizzesPage() {
         </TextField>
         <TextField
           select
-          label="Difficulty"
+          size="small"
           value={difficulty}
           onChange={(event) => {
             setDifficulty(event.target.value);
             setPage(0);
           }}
-          sx={{ minWidth: { sm: 150 }, width: { xs: '100%', sm: 'auto' } }}
+          sx={{ minWidth: 135 }}
         >
           <MenuItem value="all">All levels</MenuItem>
           <MenuItem value="Easy">Easy</MenuItem>
           <MenuItem value="Medium">Medium</MenuItem>
           <MenuItem value="Hard">Hard</MenuItem>
         </TextField>
-      </Stack>
+        <TextField
+          select
+          size="small"
+          value={published}
+          onChange={(event) => {
+            setPublished(event.target.value as PublishedFilter);
+            setPage(0);
+          }}
+          sx={{ minWidth: 135 }}
+        >
+          <MenuItem value="all">All statuses</MenuItem>
+          <MenuItem value="published">Published</MenuItem>
+          <MenuItem value="draft">Drafts</MenuItem>
+        </TextField>
+      </AdminToolbar>
+
+      {mutationError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {getErrorMessage(mutationError)}
+        </Alert>
+      )}
+
       {query.isLoading ? (
-        <Loading />
+        <Loading label="Loading quizzes…" />
       ) : query.isError ? (
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
       ) : (
         <>
-          {(publishMutation.isError || deleteMutation.isError) && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {getErrorMessage(publishMutation.error ?? deleteMutation.error)}
-            </Alert>
-          )}
-          <Card sx={{ overflow: 'auto' }}>
+          <TableContainer
+            sx={{
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: 4,
+              backgroundColor: 'background.paper',
+            }}
+          >
             <Table size="small">
               <TableHead>
                 <TableRow>
                   <TableCell>Title</TableCell>
                   <TableCell>Category</TableCell>
-                  <TableCell>Difficulty</TableCell>
+                  <TableCell>Level</TableCell>
+                  <TableCell align="right">Questions</TableCell>
+                  <TableCell align="right">Attempts</TableCell>
                   <TableCell>Published</TableCell>
-                  <TableCell>Created</TableCell>
                   <TableCell align="right">Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
-                {query.data?.content.length ? (
-                  query.data.content.map((quiz) => (
-                    <TableRow key={quiz.id}>
-                      <TableCell>
-                        <Typography fontWeight={600}>{quiz.title}</Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          {quiz.profiles?.username || quiz.id.slice(0, 8)}
-                        </Typography>
-                      </TableCell>
-                      <TableCell>{quiz.categories?.name || '—'}</TableCell>
-                      <TableCell>
-                        <Chip size="small" label={quiz.difficulty} variant="outlined" />
-                      </TableCell>
-                      <TableCell>
-                        <Switch
-                          checked={quiz.is_published}
-                          disabled={publishMutation.isPending}
-                          onChange={() => publishMutation.mutate({ id: quiz.id, published: !quiz.is_published })}
-                        />
-                      </TableCell>
-                      <TableCell>
-                        <Typography variant="body2">{new Date(quiz.created_at).toLocaleDateString()}</Typography>
-                      </TableCell>
-                      <TableCell align="right">
-                        <Stack direction="row" spacing={1} justifyContent="flex-end">
-                          <Button size="small" component={RouterLink} to={`/quizzes/${quiz.id}`} variant="outlined">
-                            View
-                          </Button>
-                          <Button
-                            size="small"
-                            component={RouterLink}
-                            to={`/quizzes/${quiz.id}/edit`}
-                            variant="outlined"
-                          >
-                            Edit
-                          </Button>
-                          <Button
-                            size="small"
-                            color="error"
-                            variant="outlined"
-                            disabled={deleteMutation.isPending}
-                            onClick={() => setDeleteTarget(quiz)}
-                          >
-                            Delete
-                          </Button>
-                        </Stack>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
+                {quizzes.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={6}>
-                      <Typography color="text.secondary" textAlign="center" sx={{ py: 4 }}>
+                    <TableCell colSpan={7}>
+                      <Typography color="text.secondary" textAlign="center" sx={{ py: 6 }}>
                         No quizzes match these filters.
                       </Typography>
                     </TableCell>
                   </TableRow>
+                ) : (
+                  quizzes.map((quiz) => (
+                    <TableRow key={quiz.id} hover>
+                      <TableCell>
+                        <Typography fontWeight={600} noWrap sx={{ maxWidth: 280 }}>
+                          {quiz.title}
+                        </Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {quiz.profiles?.username || 'Unknown author'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography variant="body2" color="text.secondary" noWrap sx={{ maxWidth: 140 }}>
+                          {quiz.categories?.name || '—'}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip size="small" variant="outlined" label={quiz.difficulty} />
+                      </TableCell>
+                      <TableCell align="right">{quiz.question_count}</TableCell>
+                      <TableCell align="right">{quiz.attempt_count.toLocaleString()}</TableCell>
+                      <TableCell>
+                        <Switch
+                          size="small"
+                          checked={quiz.is_published}
+                          disabled={publishMutation.isPending}
+                          onChange={() => publishMutation.mutate({ id: quiz.id, next: !quiz.is_published })}
+                          inputProps={{ 'aria-label': `Toggle publishing for ${quiz.title}` }}
+                        />
+                      </TableCell>
+                      <TableCell align="right">
+                        <RowActionsMenu
+                          label={`Actions for ${quiz.title}`}
+                          actions={[
+                            {
+                              label: 'View',
+                              icon: <VisibilityOutlinedIcon fontSize="small" />,
+                              onSelect: () => navigate(`/quizzes/${quiz.id}`),
+                            },
+                            {
+                              label: 'Edit',
+                              icon: <EditOutlinedIcon fontSize="small" />,
+                              onSelect: () => navigate(`/quizzes/${quiz.id}/edit`),
+                            },
+                            {
+                              label: 'Delete',
+                              icon: <DeleteOutlineIcon fontSize="small" />,
+                              color: 'error',
+                              disabled: deleteMutation.isPending,
+                              onSelect: () => setDeleteTarget(quiz),
+                            },
+                          ]}
+                        />
+                      </TableCell>
+                    </TableRow>
+                  ))
                 )}
               </TableBody>
             </Table>
-          </Card>
+          </TableContainer>
+
           {query.data && query.data.total_pages > 1 && (
-            <Pagination
-              count={query.data.total_pages}
-              page={page + 1}
-              onChange={(_event, value) => setPage(value - 1)}
-              sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
-            />
+            <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+              <Typography variant="caption" color="text.secondary">
+                Page {page + 1} of {query.data.total_pages}
+              </Typography>
+              <Pagination
+                count={query.data.total_pages}
+                page={page + 1}
+                onChange={(_event, value) => setPage(value - 1)}
+                color="primary"
+              />
+            </Stack>
           )}
         </>
       )}
+
       <ConfirmDialog
         open={Boolean(deleteTarget)}
         title="Delete this quiz?"
-        message={`Delete ${deleteTarget?.title ?? 'this quiz'}? Its questions and attempt history will be removed.`}
+        message={`${deleteTarget?.title ?? 'This quiz'} and its attempt history will be permanently removed.`}
         confirmLabel="Delete quiz"
         destructive
         busy={deleteMutation.isPending}
@@ -215,6 +264,6 @@ export default function AdminQuizzesPage() {
           if (deleteTarget) deleteMutation.mutate(deleteTarget.id, { onSettled: () => setDeleteTarget(null) });
         }}
       />
-    </Box>
+    </AdminPage>
   );
 }

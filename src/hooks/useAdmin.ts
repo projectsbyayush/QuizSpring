@@ -6,8 +6,13 @@ export const adminKeys = {
   stats: ['admin', 'stats'] as const,
   users: (search: string, role: Role | 'all', status: 'all' | 'active' | 'banned', page: number) =>
     ['admin', 'users', search, role, status, page] as const,
-  quizzes: (search: string, categoryId: string, difficulty: string, page: number) =>
-    ['admin', 'quizzes', search, categoryId, difficulty, page] as const,
+  quizzes: (
+    search: string,
+    categoryId: string,
+    difficulty: string,
+    published: 'all' | 'published' | 'draft',
+    page: number,
+  ) => ['admin', 'quizzes', search, categoryId, difficulty, published, page] as const,
   attempts: (filters: AdminAttemptFilters, page: number) => ['admin', 'attempts', filters, page] as const,
   categories: ['admin', 'categories'] as const,
 };
@@ -30,10 +35,24 @@ export function useAdminUsersQuery(
   });
 }
 
-export function useAdminQuizzesQuery(search: string, categoryId: string, difficulty: string, page: number) {
+export function useAdminQuizzesQuery(
+  search: string,
+  categoryId: string,
+  difficulty: string,
+  published: 'all' | 'published' | 'draft',
+  page: number,
+) {
   return useQuery({
-    queryKey: adminKeys.quizzes(search, categoryId, difficulty, page),
-    queryFn: () => listAdminQuizzes(search, page, 50, categoryId || undefined, difficulty),
+    queryKey: adminKeys.quizzes(search, categoryId, difficulty, published, page),
+    queryFn: () =>
+      listAdminQuizzes(
+        search,
+        page,
+        50,
+        categoryId || undefined,
+        difficulty,
+        published === 'all' ? undefined : published === 'published',
+      ),
     placeholderData: keepPreviousData,
   });
 }

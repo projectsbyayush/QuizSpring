@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Box,
   Button,
-  Chip,
   FormControl,
   InputAdornment,
   InputLabel,
@@ -57,14 +56,9 @@ export default function QuizzesPage() {
             {page?.total_elements ?? 0} published {page?.total_elements === 1 ? 'quiz' : 'quizzes'}
           </Typography>
         </Box>
-        <Stack direction="row" spacing={1}>
-          <Button component={RouterLink} to="/quizzes/mine" variant="outlined">
-            My quizzes
-          </Button>
-          <Button component={RouterLink} to="/quizzes/create" variant="contained">
-            Create quiz
-          </Button>
-        </Stack>
+        <Button component={RouterLink} to="/quizzes/create" variant="contained">
+          Create quiz
+        </Button>
       </Stack>
 
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} sx={{ mb: 1.5 }}>
@@ -121,14 +115,6 @@ export default function QuizzesPage() {
             <MenuItem value="title">A–Z</MenuItem>
           </Select>
         </FormControl>
-      </Stack>
-
-      <Stack direction="row" spacing={1} sx={{ mb: 3, flexWrap: 'wrap', gap: 1 }} useFlexGap>
-        <Chip
-          label={`Category: ${filters.categoryId === 'all' ? 'All' : (categories.find((category) => category.id === filters.categoryId)?.name ?? 'Unknown')}`}
-          variant="outlined"
-        />
-        <Chip label={`Difficulty: ${filters.difficulty}`} variant="outlined" />
       </Stack>
 
       {quizzesQuery.isLoading ? (

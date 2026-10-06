@@ -10,6 +10,7 @@ import type {
   ManagedQuizDetail,
   PageResponse,
   Question,
+  Role,
   QuizCreateInput,
   QuizSummary,
   SafeQuestion,
@@ -92,13 +93,13 @@ const demoUser: User = {
   email: 'demo@quizspring.demo',
   username: 'demo-explorer',
   avatar_url: null,
-  role: 'user',
-  total_xp: 0,
-  level: 1,
-  streak: 0,
-  current_streak: 0,
-  longest_streak: 0,
-  last_active_date: null,
+  role: 'admin',
+  total_xp: 1240,
+  level: 4,
+  streak: 3,
+  current_streak: 3,
+  longest_streak: 9,
+  last_active_date: todayKey(),
   is_banned: false,
   created_at: '2026-01-15T09:00:00Z',
 };
@@ -518,6 +519,90 @@ const quizzes: StoredQuiz[] = [
 const attempts: StoredAttempt[] = [];
 const pending: StoredAttempt[] = [];
 
+function seedAttempt(
+  id: string,
+  quizId: string,
+  userId: string,
+  score: number,
+  xpEarned: number,
+  timeTaken: number,
+  completedAt: string,
+): StoredAttempt {
+  const quiz = quizzes.find((item) => item.id === quizId);
+  const total = quiz?.questions.length ?? 5;
+  return {
+    id,
+    quiz_id: quizId,
+    user_id: userId,
+    score,
+    total_questions: total,
+    xp_earned: xpEarned,
+    base_xp: xpEarned,
+    time_bonus_xp: 0,
+    streak_bonus_xp: 0,
+    time_taken: timeTaken,
+    completed_at: completedAt,
+    answers: (quiz?.questions ?? []).map((question, index) => ({
+      question_id: question.id,
+      selected: index < score ? question.correct_answer : null,
+      correct_answer: question.correct_answer,
+      correct: index < score,
+      question_text: question.question_text,
+      options: question.options,
+      explanation: question.explanation,
+    })),
+  };
+}
+
+attempts.push(
+  seedAttempt('demo-attempt-1', 'quiz-capital', 'demo-user-3', 5, 100, 214, '2026-09-28T18:22:00Z'),
+  seedAttempt('demo-attempt-2', 'quiz-science', 'demo-user-4', 4, 80, 168, '2026-09-27T11:05:00Z'),
+  seedAttempt('demo-attempt-3', 'quiz-history', 'demo-user-5', 3, 90, 302, '2026-09-26T20:41:00Z'),
+  seedAttempt('demo-attempt-4', 'quiz-capital', 'demo-user-6', 4, 80, 251, '2026-09-25T09:14:00Z'),
+  seedAttempt('demo-attempt-5', 'quiz-science', 'demo-user-7', 5, 100, 139, '2026-09-24T16:30:00Z'),
+  seedAttempt('demo-attempt-6', 'quiz-history', 'demo-user-8', 2, 60, 388, '2026-09-22T13:55:00Z'),
+  seedAttempt('demo-attempt-7', 'quiz-capital', 'demo-user-2', 5, 100, 176, '2026-09-21T08:47:00Z'),
+);
+
+function demoUserFrom(
+  id: string,
+  username: string,
+  email: string,
+  role: Role,
+  totalXp: number,
+  joinedAt: string,
+  isBanned = false,
+): User {
+  return {
+    id,
+    email,
+    username,
+    avatar_url: null,
+    role,
+    total_xp: totalXp,
+    level: levelForXp(totalXp),
+    streak: id === demoUser.id ? demoUser.streak : 0,
+    current_streak: id === demoUser.id ? demoUser.current_streak : 0,
+    longest_streak: id === demoUser.id ? demoUser.longest_streak : 0,
+    last_active_date: id === demoUser.id ? demoUser.last_active_date : null,
+    is_banned: isBanned,
+    created_at: joinedAt,
+  };
+}
+
+const mockUsers: User[] = [
+  demoUser,
+  demoUserFrom('demo-user-2', 'nova-quiz', 'nova@quizspring.demo', 'admin', 4820, '2026-02-04T09:12:00Z'),
+  demoUserFrom('demo-user-3', 'atlas', 'atlas@quizspring.demo', 'user', 3110, '2026-03-19T14:40:00Z'),
+  demoUserFrom('demo-user-4', 'maple', 'maple@quizspring.demo', 'user', 2260, '2026-04-02T08:05:00Z'),
+  demoUserFrom('demo-user-5', 'orion', 'orion@quizspring.demo', 'user', 1740, '2026-05-11T17:22:00Z'),
+  demoUserFrom('demo-user-6', 'juno', 'juno@quizspring.demo', 'user', 980, '2026-06-23T11:58:00Z'),
+  demoUserFrom('demo-user-7', 'rhea', 'rhea@quizspring.demo', 'user', 640, '2026-07-08T19:30:00Z'),
+  demoUserFrom('demo-user-8', 'cyrus', 'cyrus@quizspring.demo', 'user', 210, '2026-08-15T07:44:00Z'),
+  demoUserFrom('demo-user-9', 'wren', 'wren@quizspring.demo', 'user', 0, '2026-09-01T12:00:00Z'),
+  demoUserFrom('demo-user-10', 'spam-bot', 'spam-bot@quizspring.demo', 'user', 120, '2026-09-12T22:10:00Z', true),
+];
+
 function categoryById(id: string | null): Category | null {
   return categories.find((category) => category.id === id) ?? null;
 }
@@ -658,8 +743,12 @@ function completeAttempt(
   return record;
 }
 
+function attemptsFor(userId: string): StoredAttempt[] {
+  return attempts.filter((attempt) => attempt.user_id === userId && attempt.completed_at !== null);
+}
+
 function dashboard(): DashboardData {
-  const completed = attempts.filter((attempt) => attempt.completed_at !== null);
+  const completed = attemptsFor(demoUser.id);
   const correct = completed.reduce((sum, attempt) => sum + attempt.score, 0);
   const totalQuestions = completed.reduce((sum, attempt) => sum + attempt.total_questions, 0);
   const accuracy = totalQuestions === 0 ? 0 : Math.round((correct * 1000) / totalQuestions) / 10;
@@ -986,17 +1075,208 @@ export async function mockAdapter(config: InternalAxiosRequestConfig) {
   }
 
   if (method === 'get' && path === '/attempts/mine') {
-    return ok(config, paginate(attempts.map(historyFor), Number(params.page ?? 0), Number(params.size ?? 20)));
+    return ok(
+      config,
+      paginate(attemptsFor(demoUser.id).map(historyFor), Number(params.page ?? 0), Number(params.size ?? 20)),
+    );
   }
 
   if (method === 'get' && path === '/attempts/accuracy') {
-    const correct = attempts.reduce((sum, attempt) => sum + attempt.score, 0);
-    const total = attempts.reduce((sum, attempt) => sum + attempt.total_questions, 0);
+    const mine = attemptsFor(demoUser.id);
+    const correct = mine.reduce((sum, attempt) => sum + attempt.score, 0);
+    const total = mine.reduce((sum, attempt) => sum + attempt.total_questions, 0);
     return ok(config, { correct, total, percentage: total === 0 ? 0 : Math.round((correct * 1000) / total) / 10 });
   }
 
   if (method === 'get' && path === '/dashboard') {
     return ok(config, dashboard());
+  }
+
+  if (path === '/admin/stats' && method === 'get') {
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const completed = attempts.filter((attempt) => attempt.completed_at !== null);
+    const active7d = mockUsers.filter(
+      (user) => user.last_active_date !== null && new Date(user.last_active_date).getTime() >= sevenDaysAgo,
+    ).length;
+    return ok(config, {
+      users: mockUsers.length,
+      quizzes: quizzes.length,
+      categories: categories.length,
+      attempts: completed.length,
+      active_7d: active7d,
+      recent_quizzes: [...quizzes]
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, 5)
+        .map((quiz) => ({ id: quiz.id, title: quiz.title, created_at: quiz.created_at })),
+      recent_signups: [...mockUsers]
+        .sort((a, b) => b.created_at.localeCompare(a.created_at))
+        .slice(0, 5)
+        .map((user) => ({ id: user.id, username: user.username, email: user.email, created_at: user.created_at })),
+      recent_attempts: [...completed]
+        .sort((a, b) => (b.completed_at ?? '').localeCompare(a.completed_at ?? ''))
+        .slice(0, 5)
+        .map((attempt) => ({
+          id: attempt.id,
+          user_id: attempt.user_id,
+          quiz_id: attempt.quiz_id,
+          score: attempt.score,
+          total_questions: attempt.total_questions,
+          completed_at: attempt.completed_at ?? nowIso(),
+        })),
+    });
+  }
+
+  if (method === 'get' && path === '/admin/users') {
+    const search = (params.search ?? '').toLowerCase();
+    const role = params.role ?? 'all';
+    const bannedParam = params.banned ?? params.is_banned;
+    let items = [...mockUsers];
+    if (search) {
+      items = items.filter(
+        (user) =>
+          (user.username ?? '').toLowerCase().includes(search) || (user.email ?? '').toLowerCase().includes(search),
+      );
+    }
+    if (role !== 'all') items = items.filter((user) => user.role === role);
+    if (bannedParam !== undefined && bannedParam !== '') {
+      items = items.filter((user) => user.is_banned === (bannedParam === 'true'));
+    }
+    items.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return ok(config, paginate(items, Number(params.page ?? 0), Number(params.size ?? 50)));
+  }
+
+  const adminUserMatch = path.match(/^\/admin\/users\/([^/]+)\/(role|ban|unban)$/);
+  if (adminUserMatch) {
+    const target = mockUsers.find((user) => user.id === adminUserMatch[1]);
+    if (!target) return fail(config, 404, 'USER_NOT_FOUND', 'User was not found');
+    if (adminUserMatch[2] === 'role') {
+      target.role = (body.role as Role) ?? target.role;
+    } else {
+      target.is_banned = adminUserMatch[2] === 'unban' ? false : body.banned !== false;
+    }
+    if (target.id === demoUser.id) demoUser.role = target.role;
+    return ok(config, { ...target });
+  }
+
+  if (method === 'get' && path === '/admin/quizzes') {
+    const search = (params.search ?? '').toLowerCase();
+    const categoryId = params.categoryId ?? params.category_id;
+    const difficulty = params.difficulty;
+    const publishedParam = params.is_published;
+    let items = [...quizzes];
+    if (search) items = items.filter((quiz) => quiz.title.toLowerCase().includes(search));
+    if (categoryId) items = items.filter((quiz) => quiz.category_id === categoryId);
+    if (difficulty && difficulty !== 'all') items = items.filter((quiz) => quiz.difficulty === difficulty);
+    if (publishedParam !== undefined && publishedParam !== '') {
+      items = items.filter((quiz) => quiz.is_published === (publishedParam === 'true'));
+    }
+    items.sort((a, b) => b.created_at.localeCompare(a.created_at));
+    return ok(config, paginate(items.map(toSummary), Number(params.page ?? 0), Number(params.size ?? 50)));
+  }
+
+  const adminQuizMatch = path.match(/^\/admin\/quizzes\/([^/]+)(\/publish)?$/);
+  if (adminQuizMatch) {
+    const quiz = quizzes.find((item) => item.id === adminQuizMatch[1]);
+    if (!quiz) return fail(config, 404, 'QUIZ_NOT_FOUND', 'Quiz was not found');
+    if (adminQuizMatch[2] === '/publish' && method === 'patch') {
+      quiz.is_published = body.is_published !== false;
+      return ok(config, toSummary(quiz));
+    }
+    if (method === 'delete') {
+      for (let index = attempts.length - 1; index >= 0; index -= 1) {
+        if (attempts[index].quiz_id === quiz.id) attempts.splice(index, 1);
+      }
+      quizzes.splice(quizzes.indexOf(quiz), 1);
+      return ok(config, null, 204);
+    }
+    if (method === 'put') {
+      const input = body as unknown as QuizCreateInput;
+      if (input.title !== undefined) quiz.title = String(input.title);
+      if (input.description !== undefined) quiz.description = input.description ?? null;
+      if (input.category_id !== undefined) quiz.category_id = String(input.category_id);
+      if (input.difficulty !== undefined) quiz.difficulty = input.difficulty;
+      if (input.time_limit !== undefined) quiz.time_limit = input.time_limit ?? null;
+      if (input.is_published !== undefined) quiz.is_published = input.is_published;
+      if (input.questions !== undefined) {
+        quiz.questions = input.questions.map((question, index) => ({
+          id: `q-${quiz.id}-${index}`,
+          quiz_id: quiz.id,
+          question_text: question.question_text,
+          options: question.options,
+          correct_answer: question.correct_answer,
+          explanation: question.explanation ?? null,
+          order: index,
+        }));
+      }
+      return ok(config, toDetail(quiz));
+    }
+  }
+
+  if (method === 'get' && path === '/admin/categories') {
+    return ok(
+      config,
+      categories.map((category) => ({ ...category })),
+    );
+  }
+
+  if (method === 'post' && path === '/admin/categories') {
+    const name = String(body.name ?? '').trim();
+    if (!name) return fail(config, 400, 'INVALID_CATEGORY', 'Category name is required');
+    const created: Category = {
+      id: uid(),
+      name,
+      slug: name.toLowerCase().replace(/[^a-z0-9]+/g, '-'),
+      description: (body.description as string | null) ?? null,
+      icon: (body.icon as string | null) ?? null,
+      created_at: nowIso(),
+    };
+    categories.push(created);
+    return ok(config, created, 201);
+  }
+
+  const adminCategoryMatch = path.match(/^\/admin\/categories\/([^/]+)$/);
+  if (adminCategoryMatch) {
+    const category = categories.find((item) => item.id === adminCategoryMatch[1]);
+    if (!category) return fail(config, 404, 'CATEGORY_NOT_FOUND', 'Category was not found');
+    if (method === 'put') {
+      const name = String(body.name ?? category.name).trim();
+      category.name = name;
+      category.slug = name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      category.description = (body.description as string | null) ?? null;
+      category.icon = (body.icon as string | null) ?? null;
+      return ok(config, { ...category });
+    }
+    if (method === 'delete') {
+      if (quizzes.some((quiz) => quiz.category_id === category.id)) {
+        return fail(config, 409, 'CATEGORY_IN_USE', 'Categories used by quizzes cannot be deleted');
+      }
+      categories.splice(categories.indexOf(category), 1);
+      return ok(config, null, 204);
+    }
+  }
+
+  if (method === 'get' && path === '/admin/attempts') {
+    const search = (params.search ?? '').toLowerCase();
+    const userId = params.userId ?? params.user_id;
+    const quizId = params.quizId ?? params.quiz_id;
+    let items = attempts.filter((attempt) => attempt.completed_at !== null);
+    if (userId) items = items.filter((attempt) => attempt.user_id === userId);
+    if (quizId) items = items.filter((attempt) => attempt.quiz_id === quizId);
+    if (search) {
+      items = items.filter((attempt) => {
+        const quiz = quizzes.find((item) => item.id === attempt.quiz_id);
+        const user = mockUsers.find((item) => item.id === attempt.user_id);
+        return (
+          (quiz?.title ?? '').toLowerCase().includes(search) ||
+          (user?.username ?? '').toLowerCase().includes(search) ||
+          (user?.email ?? '').toLowerCase().includes(search)
+        );
+      });
+    }
+    if (params.from) items = items.filter((attempt) => (attempt.completed_at ?? '') >= String(params.from));
+    if (params.to) items = items.filter((attempt) => (attempt.completed_at ?? '') <= String(params.to));
+    items.sort((a, b) => (b.completed_at ?? '').localeCompare(a.completed_at ?? ''));
+    return ok(config, paginate(items.map(historyFor), Number(params.page ?? 0), Number(params.size ?? 50)));
   }
 
   if (method === 'get' && path === '/profile') {

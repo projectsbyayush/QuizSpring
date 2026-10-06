@@ -51,10 +51,12 @@ export async function listAdminQuizzes(
   size = 50,
   categoryId?: string,
   difficulty?: string,
+  published?: boolean,
 ): Promise<PageResponse<QuizSummary>> {
-  const params: Record<string, string | number> = { search: search.trim(), page, size };
+  const params: Record<string, string | number | boolean> = { search: search.trim(), page, size };
   if (categoryId) params.categoryId = categoryId;
   if (difficulty && difficulty !== 'all') params.difficulty = difficulty;
+  if (published !== undefined) params.is_published = published;
   const { data } = await apiClient.get<PageResponse<QuizSummary>>('/admin/quizzes', { params });
   return data;
 }

@@ -96,7 +96,7 @@ export default function DashboardPage() {
       </Card>
 
       <Box
-        sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2.5, mb: 4 }}
+        sx={{ display: 'grid', gridTemplateColumns: { xs: 'repeat(2, 1fr)', md: 'repeat(4, 1fr)' }, gap: 2.5, mb: 3 }}
       >
         <StatCard
           label="Attempted"
@@ -110,7 +110,6 @@ export default function DashboardPage() {
           value={stats.total_xp.toLocaleString()}
           sub={`Level ${stats.level}`}
           icon={<BoltOutlinedIcon color="secondary" />}
-          progress={progress.pct}
           accent="secondary.main"
         />
         <StatCard
@@ -118,7 +117,6 @@ export default function DashboardPage() {
           value={`${stats.accuracy}%`}
           sub="correct answers"
           icon={<TrackChangesOutlinedIcon color="success" />}
-          progress={stats.accuracy}
           accent="success.main"
         />
         <StatCard
@@ -132,11 +130,9 @@ export default function DashboardPage() {
 
       <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', md: '7fr 5fr' }, gap: 3, alignItems: 'stretch' }}>
         <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
-            <Typography variant="h5" fontWeight={800}>
-              Recent activity
-            </Typography>
-          </Stack>
+          <Typography variant="h5" fontWeight={800} sx={{ mb: 1 }}>
+            Recent activity
+          </Typography>
           {recent.length === 0 ? (
             <Card sx={{ flexGrow: 1, display: 'flex' }}>
               <EmptyState title="No attempts yet" body="Play your first quiz to see activity here." />
@@ -176,7 +172,7 @@ export default function DashboardPage() {
           )}
         </Box>
         <Box sx={{ display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <Stack direction="row" alignItems="center" justifyContent="space-between" mb={1}>
+          <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 1 }}>
             <Typography variant="h5" fontWeight={800}>
               Recommended for you
             </Typography>
