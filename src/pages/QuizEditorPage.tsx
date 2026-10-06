@@ -303,7 +303,7 @@ export default function QuizEditorPage({ quizId }: { quizId?: string }) {
                         alignItems: 'flex-start',
                         border: 1,
                         borderColor: question.correct_answer === optionIndex ? 'success.main' : 'divider',
-                        borderRadius: 2,
+                        borderRadius: 1,
                         p: 1,
                         pl: 0.5,
                       }}

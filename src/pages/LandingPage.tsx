@@ -174,7 +174,7 @@ export default function LandingPage() {
                       width: '100%',
                       height: { xs: 220, md: 280 },
                       objectFit: 'cover',
-                      borderRadius: 2,
+                      borderRadius: 1.5,
                       mb: 2,
                     }}
                   />
@@ -248,7 +248,7 @@ export default function LandingPage() {
                       component="img"
                       src={highlight.image}
                       alt={highlight.alt}
-                      sx={{ width: '100%', height: 170, objectFit: 'cover', borderRadius: 2 }}
+                      sx={{ width: '100%', height: 170, objectFit: 'cover', borderRadius: 1.5 }}
                     />
                     <Typography variant="h5">{highlight.title}</Typography>
                     <Typography color="text.secondary" sx={{ lineHeight: 1.7 }}>
@@ -346,7 +346,7 @@ export default function LandingPage() {
                       maxWidth: 340,
                       height: 220,
                       objectFit: 'cover',
-                      borderRadius: 2,
+                      borderRadius: 1.5,
                       justifySelf: { xs: 'start', md: 'end' },
                     }}
                   />

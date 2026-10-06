@@ -130,6 +130,20 @@ public class AdminService {
     }
 
     @Transactional
+    public void deleteUser(UUID userId) {
+        requireAdmin();
+        userRepository.findByRoleForUpdate(Role.ADMIN);
+        UserAccount user = findUserForUpdate(userId);
+        if (user.getId().equals(currentUserService.id())) {
+            throw new BadRequestException("SELF_DELETE_FORBIDDEN", "You cannot delete your own account");
+        }
+        if (user.getRole() == Role.ADMIN && userRepository.countByRole(Role.ADMIN) <= 1) {
+            throw new ConflictException("LAST_ADMIN", "At least one administrator must remain");
+        }
+        userRepository.delete(user);
+    }
+
+    @Transactional
     public UserResponse updateBan(UUID userId, BanUpdateRequest request) {
         requireAdmin();
         userRepository.findByRoleForUpdate(Role.ADMIN);

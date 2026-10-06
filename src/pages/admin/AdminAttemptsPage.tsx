@@ -85,7 +85,7 @@ export default function AdminAttemptsPage() {
             p: 2,
             border: 1,
             borderColor: 'divider',
-            borderRadius: 4,
+            borderRadius: 1.5,
           }}
         >
           <TextField
@@ -129,7 +129,7 @@ export default function AdminAttemptsPage() {
             sx={{
               border: 1,
               borderColor: 'divider',
-              borderRadius: 4,
+              borderRadius: 1.5,
               backgroundColor: 'background.paper',
             }}
           >

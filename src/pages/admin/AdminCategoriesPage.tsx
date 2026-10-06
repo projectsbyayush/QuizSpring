@@ -109,7 +109,7 @@ export default function AdminCategoriesPage() {
         <ErrorState error={query.error} onRetry={() => void query.refetch()} />
       ) : (
         <TableContainer
-          sx={{ border: 1, borderColor: 'divider', borderRadius: 4, backgroundColor: 'background.paper' }}
+          sx={{ border: 1, borderColor: 'divider', borderRadius: 1.5, backgroundColor: 'background.paper' }}
         >
           <Table size="small">
             <TableHead>

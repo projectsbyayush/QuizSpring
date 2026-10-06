@@ -59,7 +59,7 @@ function AdminStatCard({ label, value, hint, icon, color = 'primary.main', progr
 
 export function PanelCard({ title, action, children }: { title: string; action?: ReactNode; children: ReactNode }) {
   return (
-    <Paper variant="outlined" sx={{ borderRadius: 4, overflow: 'hidden', height: '100%' }}>
+    <Paper variant="outlined" sx={{ borderRadius: 1.5, overflow: 'hidden', height: '100%' }}>
       <Box
         sx={{
           px: 2.5,
@@ -106,7 +106,7 @@ export function PanelRow({
         gap: 2,
         px: 1.5,
         py: 1.25,
-        borderRadius: 2,
+        borderRadius: 1,
         '&:hover': { backgroundColor: 'action.hover' },
       }}
     >

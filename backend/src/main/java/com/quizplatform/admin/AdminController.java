@@ -68,6 +68,12 @@ public class AdminController {
         return adminService.updateBan(id, false);
     }
 
+    @DeleteMapping("/users/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteUser(@PathVariable UUID id) {
+        adminService.deleteUser(id);
+    }
+
     @GetMapping("/quizzes")
     public PageResponse<QuizSummaryResponse> quizzes(@RequestParam(defaultValue = "") String search,
                                                      @RequestParam(required = false) UUID categoryId,

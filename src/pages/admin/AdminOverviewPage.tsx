@@ -1,4 +1,4 @@
-import { Box, Button } from '@mui/material';
+import { Box, Button, Typography } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import GroupOutlinedIcon from '@mui/icons-material/GroupOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
@@ -159,6 +159,12 @@ export default function AdminOverviewPage() {
           <Button component={RouterLink} to="/admin/attempts" size="small" variant="outlined">
             Attempt log
           </Button>
+        </Box>
+        <Box sx={{ mt: 2, px: 0.5 }}>
+          <Typography variant="caption" color="text.secondary">
+            Deleting a user is permanent: their attempts and sessions go with them, and quizzes they authored stay on
+            the platform but become unowned. At least one administrator always remains.
+          </Typography>
         </Box>
       </PanelCard>
     </Box>

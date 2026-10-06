@@ -18,9 +18,10 @@ import {
 } from '@mui/material';
 import BlockOutlinedIcon from '@mui/icons-material/BlockOutlined';
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline';
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import ShieldOutlinedIcon from '@mui/icons-material/ShieldOutlined';
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
-import { updateUserBan, updateUserRole } from '../../api/admin';
+import { deleteAdminUser, updateUserBan, updateUserRole } from '../../api/admin';
 import { getErrorMessage } from '../../api/client';
 import ConfirmDialog from '../../components/ConfirmDialog';
 import { ErrorState, Loading } from '../../components/Feedback';
@@ -42,6 +43,7 @@ export default function AdminUsersPage() {
   const [page, setPage] = useState(0);
   const [action, setAction] = useState<UserAction | null>(null);
   const [detailUser, setDetailUser] = useState<User | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<User | null>(null);
 
   const query = useAdminUsersQuery(search, role, status, page);
 
@@ -53,7 +55,15 @@ export default function AdminUsersPage() {
     mutationFn: ({ id, banned }: { id: string; banned: boolean }) => updateUserBan(id, banned),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['admin', 'users'] }),
   });
-  const error = roleMutation.error ?? banMutation.error;
+  const deleteMutation = useMutation({
+    mutationFn: deleteAdminUser,
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'users'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'stats'] });
+      void queryClient.invalidateQueries({ queryKey: ['admin', 'attempts'] });
+    },
+  });
+  const error = roleMutation.error ?? banMutation.error ?? deleteMutation.error;
 
   const updateSearch = (value: string): void => {
     setSearch(value);
@@ -117,7 +127,7 @@ export default function AdminUsersPage() {
             sx={{
               border: 1,
               borderColor: 'divider',
-              borderRadius: 4,
+              borderRadius: 1.5,
               backgroundColor: 'background.paper',
             }}
           >
@@ -211,6 +221,13 @@ export default function AdminUsersPage() {
                                 onSelect: () => setAction({ type: 'role', user: row }),
                               },
                               {
+                                label: 'Delete user',
+                                icon: <DeleteOutlineIcon fontSize="small" />,
+                                color: 'error',
+                                disabled: isSelf || deleteMutation.isPending,
+                                onSelect: () => setDeleteTarget(row),
+                              },
+                              {
                                 label: row.is_banned ? 'Unban user' : 'Ban user',
                                 icon: row.is_banned ? (
                                   <CheckCircleOutlineIcon fontSize="small" />
@@ -289,6 +306,18 @@ export default function AdminUsersPage() {
             { id: action.user.id, nextRole: action.user.role === 'admin' ? 'user' : 'admin' },
             { onSettled: () => setAction(null) },
           );
+        }}
+      />
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete this user?"
+        message={`This permanently removes ${deleteTarget?.username || deleteTarget?.email || 'this account'}. Their attempts, answers, and sessions are deleted and their quizzes become unowned. This cannot be undone.`}
+        confirmLabel="Delete user"
+        destructive
+        busy={deleteMutation.isPending}
+        onCancel={() => setDeleteTarget(null)}
+        onConfirm={() => {
+          if (deleteTarget) deleteMutation.mutate(deleteTarget.id, { onSettled: () => setDeleteTarget(null) });
         }}
       />
     </AdminPage>

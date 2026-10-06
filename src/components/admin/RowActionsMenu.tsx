@@ -54,7 +54,7 @@ export default function RowActionsMenu({ actions, label = 'Row actions' }: { act
             right: 0,
             zIndex: 1300,
             minWidth: 180,
-            borderRadius: 3,
+            borderRadius: 1.5,
             overflow: 'hidden',
             py: 0.5,
           }}

@@ -41,7 +41,7 @@ export default function DashboardRowCard({
             flexShrink: 0,
             display: 'grid',
             placeItems: 'center',
-            borderRadius: 2,
+            borderRadius: 1.5,
             backgroundColor: badgeBackground,
             color: badgeColor,
           }}

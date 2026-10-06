@@ -98,7 +98,7 @@ export function SearchField({
         backgroundColor: 'background.paper',
         border: '1px solid',
         borderColor: 'divider',
-        borderRadius: 3,
+        borderRadius: 1.5,
         outline: 'none',
         '&::placeholder': { color: 'text.secondary', opacity: 1 },
         '&:focus': { borderColor: theme.palette.primary.main },

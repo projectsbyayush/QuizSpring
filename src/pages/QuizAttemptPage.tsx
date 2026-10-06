@@ -161,7 +161,7 @@ export default function QuizAttemptPage() {
                   sx={{
                     border: 1,
                     borderColor: 'divider',
-                    borderRadius: 3,
+                    borderRadius: 1.5,
                     px: 1.5,
                     mb: 1,
                     ml: 0,

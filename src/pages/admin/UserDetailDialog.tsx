@@ -76,7 +76,7 @@ export default function UserDetailDialog({
                 gridTemplateColumns: 'repeat(2, 1fr)',
                 gap: 1.5,
                 p: 2,
-                borderRadius: 3,
+                borderRadius: 1.5,
                 border: 1,
                 borderColor: 'divider',
               }}

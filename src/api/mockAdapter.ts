@@ -1145,6 +1145,20 @@ export async function mockAdapter(config: InternalAxiosRequestConfig) {
     return ok(config, paginate(items, Number(params.page ?? 0), Number(params.size ?? 50)));
   }
 
+  const adminUserDeleteMatch = path.match(/^\/admin\/users\/([^/]+)$/);
+  if (adminUserDeleteMatch && method === 'delete') {
+    if (adminUserDeleteMatch[1] === demoUser.id) {
+      return fail(config, 400, 'SELF_DELETE_FORBIDDEN', 'You cannot delete your own account');
+    }
+    const index = mockUsers.findIndex((user) => user.id === adminUserDeleteMatch[1]);
+    if (index === -1) return fail(config, 404, 'USER_NOT_FOUND', 'User was not found');
+    for (let i = attempts.length - 1; i >= 0; i -= 1) {
+      if (attempts[i].user_id === mockUsers[index].id) attempts.splice(i, 1);
+    }
+    mockUsers.splice(index, 1);
+    return ok(config, null, 204);
+  }
+
   const adminUserMatch = path.match(/^\/admin\/users\/([^/]+)\/(role|ban|unban)$/);
   if (adminUserMatch) {
     const target = mockUsers.find((user) => user.id === adminUserMatch[1]);

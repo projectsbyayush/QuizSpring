@@ -47,7 +47,7 @@ function buildTheme(mode: 'light' | 'dark') {
       body2: { lineHeight: 1.55 },
       button: { textTransform: 'none', fontWeight: 650, letterSpacing: 0 },
     },
-    shape: { borderRadius: 10 },
+    shape: { borderRadius: 6 },
     components: {
       MuiCssBaseline: {
         styleOverrides: {
@@ -78,12 +78,12 @@ function buildTheme(mode: 'light' | 'dark') {
       MuiButton: {
         styleOverrides: {
           root: {
-            borderRadius: 10,
-            paddingLeft: 20,
-            paddingRight: 20,
-            paddingTop: 10,
-            paddingBottom: 10,
-            minHeight: 42,
+            borderRadius: 8,
+            paddingLeft: 18,
+            paddingRight: 18,
+            paddingTop: 9,
+            paddingBottom: 9,
+            minHeight: 40,
           },
           contained: { boxShadow: 'none', '&:hover': { boxShadow: 'none' } },
         },
@@ -91,7 +91,7 @@ function buildTheme(mode: 'light' | 'dark') {
       MuiCard: {
         styleOverrides: {
           root: {
-            borderRadius: 12,
+            borderRadius: 8,
             border: light ? '1px solid rgba(0,0,0,0.08)' : '1px solid rgba(148,163,184,0.18)',
             boxShadow: light
               ? '0 2px 4px rgba(0,0,0,0.03), 0 12px 32px rgba(0,0,0,0.05)'
@@ -101,10 +101,16 @@ function buildTheme(mode: 'light' | 'dark') {
         },
       },
       MuiPaper: {
-        styleOverrides: { rounded: { borderRadius: 12 } },
+        styleOverrides: { rounded: { borderRadius: 8 } },
       },
       MuiChip: {
-        styleOverrides: { root: { borderRadius: 8, fontWeight: 650 } },
+        styleOverrides: { root: { borderRadius: 6, fontWeight: 650 } },
+      },
+      MuiDialog: {
+        styleOverrides: { paper: { borderRadius: 12 } },
+      },
+      MuiMenu: {
+        styleOverrides: { paper: { borderRadius: 8 } },
       },
       MuiLink: {
         defaultProps: { underline: 'none' },
@@ -122,7 +128,7 @@ function buildTheme(mode: 'light' | 'dark') {
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
-            borderRadius: 10,
+            borderRadius: 8,
             backgroundColor: light ? '#f5f5f7' : '#202839',
             '& fieldset': { borderColor: 'transparent' },
             '&:hover fieldset': { borderColor: light ? 'rgba(0,113,227,0.4)' : 'rgba(77,163,255,0.45)' },

@@ -45,6 +45,10 @@ export async function updateUserBan(id: string, banned: boolean): Promise<User> 
   return data;
 }
 
+export async function deleteAdminUser(id: string): Promise<void> {
+  await apiClient.delete<void>(`/admin/users/${id}`);
+}
+
 export async function listAdminQuizzes(
   search = '',
   page = 0,

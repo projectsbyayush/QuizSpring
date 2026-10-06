@@ -45,7 +45,7 @@ function HeaderMenu({ open, onClose, children }: { open: boolean; onClose: () =>
           right: 0,
           minWidth: 230,
           zIndex: 1300,
-          borderRadius: 3,
+          borderRadius: 1.5,
           overflow: 'hidden',
           py: 0.5,
         }}
@@ -106,7 +106,7 @@ export default function Navbar() {
   const linkStyle = (active: boolean) => ({
     fontWeight: active ? 800 : 650,
     color: active ? 'primary.main' : 'text.secondary',
-    borderRadius: 2,
+    borderRadius: 1,
     paddingLeft: 1.5,
     paddingRight: 1.5,
     textDecoration: 'none',

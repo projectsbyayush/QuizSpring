@@ -150,7 +150,7 @@ export default function AdminQuizzesPage() {
             sx={{
               border: 1,
               borderColor: 'divider',
-              borderRadius: 4,
+              borderRadius: 1.5,
               backgroundColor: 'background.paper',
             }}
           >

@@ -36,7 +36,7 @@ export function AdminNavContent({ onNavigate }: { onNavigate?: () => void }) {
               selected={active}
               onClick={onNavigate}
               sx={{
-                borderRadius: 2.5,
+                borderRadius: 1,
                 mb: 0.25,
                 gap: 1.5,
                 '&.Mui-selected': {
@@ -60,7 +60,7 @@ export function AdminNavContent({ onNavigate }: { onNavigate?: () => void }) {
           component={RouterLink}
           to="/dashboard"
           onClick={onNavigate}
-          sx={{ borderRadius: 2.5, gap: 1.5, color: 'text.secondary' }}
+          sx={{ borderRadius: 1, gap: 1.5, color: 'text.secondary' }}
         >
           <ListItemIcon sx={{ minWidth: 32, color: 'inherit' }}>
             <ArrowBackIcon fontSize="small" />
@@ -77,7 +77,7 @@ export function AdminContextSummary() {
   if (stats.isLoading || !stats.data) return null;
   const data = stats.data;
   return (
-    <Paper variant="outlined" sx={{ borderRadius: 4, p: 2 }}>
+    <Paper variant="outlined" sx={{ borderRadius: 1.5, p: 2 }}>
       <Stack spacing={1.25}>
         <SummaryLine label="Users" value={data.users} />
         <SummaryLine label="Quizzes" value={data.quizzes} />
