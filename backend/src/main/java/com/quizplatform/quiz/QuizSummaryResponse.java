@@ -20,6 +20,7 @@ public record QuizSummaryResponse(
         Instant createdAt,
         long questionCount,
         long attemptCount,
+        boolean official,
         boolean canEdit
 ) {
 }

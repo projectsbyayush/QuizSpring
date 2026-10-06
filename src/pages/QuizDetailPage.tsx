@@ -14,14 +14,25 @@ import {
 } from '@mui/material';
 import SignalCellularAltIcon from '@mui/icons-material/SignalCellularAlt';
 import TimerOutlinedIcon from '@mui/icons-material/TimerOutlined';
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined';
+import { useState } from 'react';
 import { Link as RouterLink, useParams } from 'react-router-dom';
 import { ErrorState, Loading } from '../components/Feedback';
 import { useQuizQuery } from '../hooks/useQuizzes';
+import { useQuizReportStatus } from '../hooks/useReports';
+import ReportQuizDialog from './ReportQuizDialog';
+import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../context/ToastContext';
 import { XP_PER_CORRECT } from '../utils/xp';
 
 export default function QuizDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const { user } = useAuth();
+  const { showToast } = useToast();
+  const [reportOpen, setReportOpen] = useState(false);
   const query = useQuizQuery(id);
+  const canReport = Boolean(user && id && !query.data?.official && !query.data?.can_edit);
+  const reportStatus = useQuizReportStatus(id ?? '', canReport);
 
   if (query.isLoading) return <Loading label="Loading quiz…" />;
   if (query.isError || !query.data) return <ErrorState error={query.error} onRetry={() => void query.refetch()} />;
@@ -86,6 +97,21 @@ export default function QuizDetailPage() {
                   Edit quiz
                 </Button>
               )}
+              {canReport && !reportStatus.data && (
+                <Button
+                  variant="text"
+                  color="error"
+                  size="large"
+                  startIcon={<FlagOutlinedIcon />}
+                  onClick={() => setReportOpen(true)}
+                  sx={{ alignSelf: 'flex-start' }}
+                >
+                  Report this quiz
+                </Button>
+              )}
+              {canReport && reportStatus.data && (
+                <Chip color="warning" variant="outlined" icon={<FlagOutlinedIcon />} label="Reported for review" />
+              )}
             </Stack>
           </Box>
         </CardContent>
@@ -113,6 +139,14 @@ export default function QuizDetailPage() {
           )}
         </CardContent>
       </Card>
+
+      <ReportQuizDialog
+        open={reportOpen}
+        quizId={quiz.id}
+        quizTitle={quiz.title}
+        onClose={() => setReportOpen(false)}
+        onReported={() => showToast('Thanks. A moderator will review this quiz.', 'success')}
+      />
     </Box>
   );
 }

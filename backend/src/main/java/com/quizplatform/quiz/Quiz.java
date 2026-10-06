@@ -55,6 +55,9 @@ public class Quiz {
     @Column(name = "is_published", nullable = false)
     private boolean published = true;
 
+    @Column(name = "is_official", nullable = false)
+    private boolean official = false;
+
     @Column(name = "attempt_count", nullable = false)
     private long attemptCount;
 
@@ -150,6 +153,14 @@ public class Quiz {
 
     public boolean isPublished() {
         return published;
+    }
+
+    public boolean isOfficial() {
+        return official;
+    }
+
+    public void setOfficial(boolean official) {
+        this.official = official;
     }
 
     public long getAttemptCount() {

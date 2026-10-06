@@ -271,7 +271,7 @@ public class QuizService {
                 quiz.getCreatedBy() == null ? null : quiz.getCreatedBy().getId(),
                 quiz.getCreatedBy() == null ? null : com.quizplatform.user.UserReferenceResponse.from(quiz.getCreatedBy()),
                 quiz.getDifficulty(), quiz.getTimeLimit(), quiz.isPublished(), quiz.getCreatedAt(),
-                quiz.getQuestions().size(), quiz.getAttemptCount(), canEdit);
+                quiz.getQuestions().size(), quiz.getAttemptCount(), quiz.isOfficial(), canEdit);
     }
 
     private QuizDetailResponse toDetail(Quiz quiz, UUID viewerId, boolean includeAnswers) {

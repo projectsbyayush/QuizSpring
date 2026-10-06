@@ -1,0 +1,6 @@
+{
+  "java.configuration.updateBuildConfiguration": "interactive",
+  "java.autobuild.enabled": false,
+  "java.import.generatesMetadataFilesAtProjectRoot": false,
+  "java.compile.nullAnalysis.mode": "disabled"
+}

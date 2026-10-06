@@ -16,6 +16,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import { Link as RouterLink } from 'react-router-dom';
 import { EmptyState, ErrorState, Loading } from '../components/Feedback';
 import QuizCard from '../components/QuizCard';
+import CollectionsSection from '../components/CollectionsSection';
 import { useCategoriesQuery, useQuizListQuery } from '../hooks/useQuizzes';
 import type { Difficulty, QuizFilters } from '../types';
 
@@ -116,6 +117,8 @@ export default function QuizzesPage() {
           </Select>
         </FormControl>
       </Stack>
+
+      <CollectionsSection onPickCategory={(categoryId) => updateFilters({ categoryId })} />
 
       {quizzesQuery.isLoading ? (
         <Loading label="Finding great quizzes…" />

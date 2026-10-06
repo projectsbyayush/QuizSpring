@@ -9,6 +9,9 @@ import type {
   Difficulty,
   ManagedQuizDetail,
   PageResponse,
+  QuizReport,
+  ReportReason,
+  ReportStatus,
   Question,
   Role,
   QuizCreateInput,
@@ -27,6 +30,7 @@ interface StoredQuiz {
   difficulty: Difficulty;
   time_limit: number | null;
   is_published: boolean;
+  is_official?: boolean;
   created_at: string;
   attempt_count: number;
   questions: Question[];
@@ -518,6 +522,7 @@ const quizzes: StoredQuiz[] = [
 
 const attempts: StoredAttempt[] = [];
 const pending: StoredAttempt[] = [];
+const reports: QuizReport[] = [];
 
 function seedAttempt(
   id: string,
@@ -1226,6 +1231,63 @@ export async function mockAdapter(config: InternalAxiosRequestConfig) {
     }
   }
 
+  const reportMatch = path.match(/^\/quizzes\/([^/]+)\/report\/status$/);
+  if (reportMatch && method === 'get') {
+    return ok(config, { reported: reports.some((r) => r.quiz_id === reportMatch[1] && r.reporter_id === demoUser.id) });
+  }
+  const reportSubmitMatch = path.match(/^\/quizzes\/([^/]+)\/report$/);
+  if (reportSubmitMatch && method === 'post') {
+    const quiz = quizzes.find((item) => item.id === reportSubmitMatch[1]);
+    if (!quiz) return fail(config, 404, 'QUIZ_NOT_FOUND', 'Quiz was not found');
+    if (quiz.is_official) return fail(config, 400, 'REPORT_NOT_ALLOWED', 'Platform quizzes cannot be reported');
+    if (reports.some((r) => r.quiz_id === quiz.id && r.reporter_id === demoUser.id))
+      return fail(config, 409, 'ALREADY_REPORTED', 'You have already reported this quiz');
+    const record = {
+      id: uid(),
+      quiz_id: quiz.id,
+      quiz_title: quiz.title,
+      quiz_author: quiz.author_name,
+      reporter_id: demoUser.id,
+      reporter_username: demoUser.username,
+      reason: String(body.reason ?? 'OTHER') as ReportReason,
+      details: (body.details as string | null) ?? null,
+      status: 'OPEN' as ReportStatus,
+      resolution_note: null,
+      resolved_by: null,
+      resolved_at: null,
+      created_at: nowIso(),
+    };
+    reports.unshift(record);
+    return ok(config, record, 201);
+  }
+
+  if (method === 'get' && path === '/admin/reports') {
+    const status = params.status ?? 'OPEN';
+    const items = status === 'all' ? reports : reports.filter((r) => r.status === status);
+    return ok(config, paginate(items, Number(params.page ?? 0), 50));
+  }
+
+  const adminReportMatch = path.match(/^\/admin\/reports\/([^/]+)(\/unpublish-quiz)?$/);
+  if (adminReportMatch) {
+    const report = reports.find((r) => r.id === adminReportMatch[1]);
+    if (!report) return fail(config, 404, 'REPORT_NOT_FOUND', 'Report was not found');
+    if (adminReportMatch[2] && method === 'post') {
+      const quiz = quizzes.find((q) => q.id === report.quiz_id);
+      if (quiz) quiz.is_published = false;
+      report.status = 'RESOLVED';
+      report.resolution_note = 'Quiz was unpublished by an administrator';
+      report.resolved_by = demoUser.username;
+      report.resolved_at = nowIso();
+      return ok(config, null, 204);
+    }
+    if (method === 'patch') {
+      report.status = (body.status as ReportStatus) ?? 'RESOLVED';
+      report.resolution_note = (body.note as string | null) ?? null;
+      report.resolved_by = demoUser.username;
+      report.resolved_at = nowIso();
+      return ok(config, report);
+    }
+  }
   if (method === 'get' && path === '/admin/categories') {
     return ok(
       config,

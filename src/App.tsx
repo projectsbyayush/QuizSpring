@@ -24,6 +24,7 @@ const QuizCreatePage = lazy(() => import('./pages/QuizCreatePage'));
 const QuizEditPage = lazy(() => import('./pages/QuizEditPage'));
 const QuizResultsPage = lazy(() => import('./pages/QuizResultsPage'));
 const MyQuizzesPage = lazy(() => import('./pages/MyQuizzesPage'));
+const PlatformQuizzesPage = lazy(() => import('./pages/PlatformQuizzesPage'));
 const ProfilePage = lazy(() => import('./pages/ProfilePage'));
 const ProfileEditPage = lazy(() => import('./pages/ProfileEditPage'));
 const AdminLayout = lazy(() => import('./pages/admin/AdminLayout'));
@@ -32,6 +33,7 @@ const AdminUsersPage = lazy(() => import('./pages/admin/AdminUsersPage'));
 const AdminCategoriesPage = lazy(() => import('./pages/admin/AdminCategoriesPage'));
 const AdminQuizzesPage = lazy(() => import('./pages/admin/AdminQuizzesPage'));
 const AdminAttemptsPage = lazy(() => import('./pages/admin/AdminAttemptsPage'));
+const AdminReportsPage = lazy(() => import('./pages/admin/AdminReportsPage'));
 
 function LazyPage({ children }: { children: ReactNode }) {
   return <Suspense fallback={<Loading />}>{children}</Suspense>;
@@ -60,6 +62,7 @@ export default function App() {
             <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/quizzes" element={<QuizzesPage />} />
             <Route path="/quizzes/mine" element={<MyQuizzesPage />} />
+            <Route path="/platform-quizzes" element={<PlatformQuizzesPage />} />
             <Route path="/quizzes/create" element={<QuizCreatePage />} />
             <Route path="/quizzes/:id" element={<QuizDetailPage />} />
             <Route path="/quizzes/:id/play" element={<QuizAttemptPage />} />
@@ -82,6 +85,7 @@ export default function App() {
               <Route path="/admin/categories" element={<AdminCategoriesPage />} />
               <Route path="/admin/quizzes" element={<AdminQuizzesPage />} />
               <Route path="/admin/attempts" element={<AdminAttemptsPage />} />
+              <Route path="/admin/reports" element={<AdminReportsPage />} />
             </Route>
           </Route>
         </Route>

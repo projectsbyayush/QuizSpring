@@ -4,6 +4,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import DashboardOutlinedIcon from '@mui/icons-material/DashboardOutlined';
 import HistoryOutlinedIcon from '@mui/icons-material/HistoryOutlined';
+import FlagOutlinedIcon from '@mui/icons-material/FlagOutlined';
 import PeopleOutlinedIcon from '@mui/icons-material/PeopleOutlined';
 import QuizOutlinedIcon from '@mui/icons-material/QuizOutlined';
 import { useAdminStatsQuery } from '../../hooks/useAdmin';
@@ -16,6 +17,7 @@ export function AdminNavContent({ onNavigate }: { onNavigate?: () => void }) {
     { to: '/admin/quizzes', label: 'Quizzes', icon: <QuizOutlinedIcon fontSize="small" /> },
     { to: '/admin/categories', label: 'Categories', icon: <CategoryOutlinedIcon fontSize="small" /> },
     { to: '/admin/attempts', label: 'Attempts', icon: <HistoryOutlinedIcon fontSize="small" /> },
+    { to: '/admin/reports', label: 'Reports', icon: <FlagOutlinedIcon fontSize="small" /> },
   ];
 
   return (

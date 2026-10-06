@@ -55,6 +55,7 @@ export interface QuizSummary {
   created_at: string;
   question_count: number;
   attempt_count: number;
+  official?: boolean;
   can_edit: boolean;
 }
 
@@ -299,4 +300,23 @@ export interface AttemptStart {
   time_limit: number | null;
   grace_period_seconds: number;
   questions: SafeQuestion[];
+}
+
+export type ReportReason = 'INACCURATE' | 'SPAM' | 'OFFENSIVE' | 'DUPLICATE' | 'COPYRIGHT' | 'OTHER';
+export type ReportStatus = 'OPEN' | 'RESOLVED' | 'DISMISSED';
+
+export interface QuizReport {
+  id: string;
+  quiz_id: string;
+  quiz_title: string;
+  quiz_author: string | null;
+  reporter_id: string;
+  reporter_username: string | null;
+  reason: ReportReason;
+  details: string | null;
+  status: ReportStatus;
+  resolution_note: string | null;
+  resolved_by: string | null;
+  resolved_at: string | null;
+  created_at: string;
 }

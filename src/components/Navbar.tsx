@@ -84,9 +84,11 @@ export default function Navbar() {
   }
   const authenticatedLinks: NavEntry[] = [
     { label: 'Explore', to: '/quizzes' },
+    { label: 'Platform', to: '/platform-quizzes' },
     { label: 'My quizzes', to: '/quizzes/mine' },
   ];
   const guestLinks: NavEntry[] = [
+    { label: 'Platform quizzes', to: '/platform-quizzes' },
     { label: 'Features', section: 'features' },
     { label: 'How it works', section: 'how-it-works' },
   ];
@@ -95,6 +97,9 @@ export default function Navbar() {
     if (link.section) return location.pathname === '/' && hash === `#${link.section}`;
     const to = link.to ?? '/';
     if (to === '/') return location.pathname === '/';
+    if (to === '/platform-quizzes') {
+      return location.pathname.startsWith('/platform-quizzes');
+    }
     if (to === '/quizzes') {
       if (location.pathname === '/quizzes') return true;
       const section = location.pathname.split('/')[2];

@@ -31,6 +31,13 @@ public interface QuizRepository extends JpaRepository<Quiz, UUID>, JpaSpecificat
 
     long countByPublishedTrue();
 
+    long countByOfficialTrue();
+
+    @EntityGraph(attributePaths = {"category", "createdBy"})
+    List<Quiz> findTop24ByOfficialTrueAndPublishedTrueOrderByCreatedAtDesc();
+
+    long countByOfficialTrueAndPublishedTrueAndCategoryId(UUID categoryId);
+
     @EntityGraph(attributePaths = {"category", "createdBy"})
     List<Quiz> findTop100ByPublishedTrueOrderByCreatedAtDesc();
 
